@@ -211,7 +211,7 @@ class Game:
             while not correct_option:
                 option = input("{} ({}). What are you going to do "
                                "a (attack) or s (skill)?: ".format(character.__class__.__name__, player))
-
+                #HAY QUE HACER UN METODO QUE COJA LA OPCION ELEGIDA DEL CLIENTE(choose_character_option)
                 if option.lower() == "a":
                     correct_option = True
                     dmg = self.__random_damage(character.get_dmg())
@@ -294,7 +294,7 @@ class Game:
 
     def play(self):
         for s in range(int(self.stages)):
-            self.current_stage = stage + 1
+            self.current_stage = self.stages + 1
             if len(self.enemies) == 0:
                 message = "\n\t\t************************" \
                           "\n\t\t       * STAGE %s *" \
