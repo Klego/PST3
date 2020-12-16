@@ -45,7 +45,7 @@ class Characters:
     def set_alive(self, alive):
         self.stats["alive"] = alive
 
-    def attack(self, player, enemy, dmg, round):
+    def attack(self, player, enemy, dmg, round, name):
         hp = enemy.stats["HP"]
         if enemy.stats["alive"]:
             if self.__class__.__name__ == "Procrastinator":
@@ -56,8 +56,9 @@ class Characters:
                 enemy.stats["alive"] = False
             else:
                 enemy.stats["HP"] = hp
-            print("The {} ({}) did {} damage to {}. {} has {}hp left.".format(self.__class__.__name__, player, dmg,
-                                                                              enemy.name, enemy.name, hp))
+            msg = "The {} ({}) did {} damage to {}. {} has {}hp left.".format(self.__class__.__name__, name, dmg,
+                                                                              enemy.name, enemy.name, hp)
+            return msg
 
     # hp can't be higher than hp_max
     def add_hp(self):
