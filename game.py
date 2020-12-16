@@ -14,12 +14,17 @@ class Game:
         self.dicPlayer = {}
         self.current_stage = 0
         self.current_round = 0
+        self.message = ""
 
     def get_players(self):
         return self.players
 
     def set_player(self, character, i):
         self.dicPlayer["Player " + str(i + 1)] = character
+
+    def get_dic_player(self, p):
+        return self.dicPlayer["Player " + str(p + 1)]
+
 
     @staticmethod
     def display_chars_menu():
@@ -42,30 +47,31 @@ class Game:
             character = Whatsapper()
         elif option == "4":
             character = Procrastinator()
-        else:
-            print("Option not recognized.")
         return character
 
-    def show_chars_attributes(self):
+    def show_chars_attributes(self, name):
+        msg = ""
         if len(self.dicPlayer) > 0:
             for key in self.dicPlayer:
-                return "{} - {}".format(key, self.dicPlayer[key])
+                msg += key + " (" + name + ") - %s" % self.dicPlayer[key]
+        return msg
 
     @staticmethod
     def __random_damage(dmg):
         return random.randint(1, dmg)
 
     def __create_monster(self):
-        print("\n\t\t---- CURRENT MONSTERS ----")
-        print("\n\t++++++++++++++++++++++++++++++++++++++")
+        msg = "\n\t\t---- CURRENT MONSTERS ----"
+        msg += "\n\t++++++++++++++++++++++++++++++++++++++"
         for i in range(NUMBER_ENEMIES):
             n = random.randint(1, NUMBER_ENEMIES)
             self.enemies.append(Enemy(n, self.current_stage))
 
         if len(self.enemies) > 0:
             for enemy in self.enemies:
-                print("\t" + enemy.__str__())
-        print("\t++++++++++++++++++++++++++++++++++++++")
+                msg += "\n\t" + enemy.__str__()
+        msg += "\n\t++++++++++++++++++++++++++++++++++++++"
+        return msg
 
     # checks whether there is at least one dead character or not
     def __check_chars_dead(self):
@@ -91,15 +97,17 @@ class Game:
                 alive = True
         return alive
 
-    def prepare_char_attack(self, character, player, dmg):
+    def prepare_char_attack(self, character, player, dmg, name):
         n = random.randint(0, NUMBER_ENEMIES - 1)
         while not self.enemies[n].get_alive():
             n = random.randint(0, NUMBER_ENEMIES - 1)
         if self.enemies[n].get_alive():
             enemy = self.enemies[n]
-            character.attack(player, enemy, dmg, self.current_round)
+            msg = character.attack(player, enemy, dmg, self.current_round, name)
+            return msg
 
     def prepare_enemy_attack(self, enemy):
+        # idea Justo, chat teams
         n = random.randint(1, len(self.dicPlayer))
         while not self.dicPlayer["Player " + str(n)].get_alive():
             n = random.randint(1, len(self.dicPlayer))
@@ -109,6 +117,7 @@ class Game:
             enemy.attack(player, self.dicPlayer[player], dmg, self.current_stage)
 
     def heal(self, character):
+        # idea Justo, chat teams
         n = random.randint(1, len(self.dicPlayer))
         while not self.dicPlayer["Player " + str(n)].get_alive() \
                 or self.dicPlayer["Player " + str(n)].get_hp() == self.dicPlayer["Player " + str(n)].get_hp_max():
@@ -163,11 +172,9 @@ class Game:
             dmg = (character.get_dmg() + self.__random_damage(character.get_damage())) * 1.5
             self.prepare_char_attack(character, player, dmg)
             character.set_timeskill(0)
-            return True
         else:
             print("The skill is currently in cooldown for {} more rounds.".format(
                 3 - character.get_timeskill()))
-            return False
 
     def app_whatsapper_skill(self, character, message, player):
         not_hp_max = False
@@ -180,14 +187,11 @@ class Game:
                 print(message.format(character.__class__.__name__, player))
                 self.heal(character)
                 character.set_timeskill(0)
-                return True
             else:
                 print("The skill is currently in cooldown for {} more rounds.".format(
                     3 - character.get_timeskill()))
-                return False
         else:
             print("All players have their maximum HP, so the skill will not be used.")
-            return False
 
     def app_procrastinator_skill(self, character, message, player):
         if self.current_round >= 3 and not character.get_used_skill():
@@ -197,63 +201,54 @@ class Game:
                 if enemy.get_alive():
                     character.attack(player, enemy, dmg, self.current_round)
             character.set_used_skill(True)
-            return True
         else:
             print("This skill can only be used after the third round of each stage "
                   "and once per stage, so it will not be used.")
-            return False
+
+    def choose_character_option(self, option, name):
+        # La variable player esta mal
+        player = "Player 1"
+        character = self.dicPlayer[player]
+        character.update_timeskill()
+        if option.lower() == "a":
+            dmg = self.__random_damage(character.get_dmg())
+            msg = self.prepare_char_attack(character, player, dmg, name)
+            return msg
+        elif option.lower() == "s":
+            message = "The {} ({}) used his/her skill."
+            if character.__class__.__name__ == Bookworm.__name__:
+                if self.__check_chars_dead():
+                    if character.get_timeskill() >= 4:
+                        print(message.format(character.__class__.__name__, player))
+                        self.app_bookworm_skill(character)
+                    else:
+                        print("The skill is currently in cooldown for {} more rounds.".format(
+                            4 - character.get_timeskill()))
+                else:
+                    print("All players are alive, so the skill will not be used.")
+            elif character.__class__.__name__ == Worker.__name__:
+                self.app_worker_skill(character, message, player)
+            elif character.__class__.__name__ == Whatsapper.__name__:
+                self.app_whatsapper_skill(character, message, player)
+            elif character.__class__.__name__ == Procrastinator.__name__:
+                self.app_procrastinator_skill(character, message, player)
 
     def __turn(self, player, enemy):
         if player is not None:
-            correct_option = False
-            character = self.dicPlayer[player]
-            character.update_time_skill()
-            while not correct_option:
-                option = input("{} ({}). What are you going to do "
-                               "a (attack) or s (skill)?: ".format(character.__class__.__name__, player))
-                #HAY QUE HACER UN METODO QUE COJA LA OPCION ELEGIDA DEL CLIENTE(choose_character_option)
-                if option.lower() == "a":
-                    correct_option = True
-                    dmg = self.__random_damage(character.get_dmg())
-                    self.prepare_char_attack(character, player, dmg)
-
-                elif option.lower() == "s":
-                    correct_option = True
-                    message = "The {} ({}) used his/her skill."
-                    if character.__class__.__name__ == Bookworm.__name__:
-                        if self.__check_chars_dead():
-                            if character.get_timeskill() >= 4:
-                                print(message.format(character.__class__.__name__, player))
-                                self.app_bookworm_skill(character)
-                            else:
-                                print("The skill is currently in cooldown for {} more rounds.".format(
-                                    4 - character.get_timeskill()))
-                                correct_option = False
-                        else:
-                            print("All players are alive, so the skill will not be used.")
-                            correct_option = False
-                    elif character.__class__.__name__ == Worker.__name__:
-                        correct_option = self.app_worker_skill(character, message, player)
-                    elif character.__class__.__name__ == Whatsapper.__name__:
-                        correct_option = self.app_whatsapper_skill(character, message, player)
-                    elif character.__class__.__name__ == Procrastinator.__name__:
-                        correct_option = self.app_procrastinator_skill(character, message, player)
-                else:
-                    print("Option not recognized.")
-                    correct_option = False
-
+           pass
+        #     AQUi iba la funcion choose_character_option
         elif enemy is not None:
             self.prepare_enemy_attack(enemy)
 
     def __play_round(self):
         while self.__check_monsters_alive() and self.__check_chars_alive():
             self.current_round += 1
-            print("\n+++++++++++++++++++++++++++++++ Round %s +++++++++++++++++++++++++++++++" % self.current_round)
-            message = "\n\t\t\t\t---------------------------"
+            message = "\n+++++++++++++++++++++++++++++++ Round %s +++++++++++++++++++++++++++++++" % self.current_round
+            message += "\n\t\t\t\t---------------------------"
             message += "\n\t\t\t\t     - {} TURN -"
             message += "\n\t\t\t\t---------------------------"
             if self.__check_chars_alive():
-                print(message.format('PLAYERS'))
+                new_msg = message.format('PLAYERS')
                 for player in self.dicPlayer:
                     if self.dicPlayer[player].get_alive():
                         if self.__check_monsters_alive():
@@ -261,6 +256,7 @@ class Game:
                     else:
                         print("The {} ({}) has been defeated. It can not make "
                               "any move until revived.".format(self.dicPlayer[player].__class__.__name__, player))
+
             # enemies turn
             if self.__check_monsters_alive():
                 print(message.format('MONSTERS'))
@@ -285,23 +281,26 @@ class Game:
             self.show_chars_attributes()
 
     def check_end_game(self):
-        if not self.__check_chars_alive() and self.__check_monsters_alive():
-            print("All characters have been defeated. Try again. GAME OVER")
-        if not self.__check_monsters_alive() and self.current_stage == int(self.stages):
-            print("All the stages have been cleared. CONGRATS! YOU WON THE GAME!")
-        else:
-            pass
-
-    def play(self):
-        for s in range(int(self.stages)):
-            self.current_stage = self.stages + 1
-            if len(self.enemies) == 0:
-                message = "\n\t\t************************" \
-                          "\n\t\t       * STAGE %s *" \
-                          "\n\t\t************************" % self.current_stage
-                self.__create_monster()
-
-            self.__play_round()
-
         if self.__check_chars_alive() and not self.__check_monsters_alive():
             self.prepare_new_stage()
+        if not self.__check_chars_alive() and self.__check_monsters_alive():
+            print("All characters have been defeated. Try again. GAME OVER")
+        #     Win = False
+        if not self.__check_monsters_alive() and self.current_stage == int(self.stages):
+            print("All the stages have been cleared. CONGRATS! YOU WON THE GAME!")
+    #     Win = True
+
+    def show_stage(self):
+        self.current_stage = self.current_stage + 1
+        if len(self.enemies) == 0:
+            message = "\n\t\t************************" \
+                      "\n\t\t       * STAGE %s *" \
+                      "\n\t\t************************" % self.current_stage
+            message += self.__create_monster()
+            return message
+
+    def play(self):
+
+        self.__play_round()
+
+
