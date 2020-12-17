@@ -21,7 +21,7 @@ class Enemy:
             self.name = "Teacher"
             self.stats = {"HP": 15, "DMG": 7, "alive": True}
 
-    def attack(self, player, character, dmg, stage):
+    def attack(self, name, character, dmg, stage):
         hp = character.stats["HP"]
         if self.name == "Theoretical class":
             dmg += stage
@@ -36,11 +36,10 @@ class Enemy:
             else:
                 character.stats["HP"] = hp
 
-            print("The {} did {} damage to {} ({}). {} has {}hp left.".format(self.name,
-                                                                              dmg, character.__class__.__name__, player,
-                                                                              character.__class__.__name__, hp))
-        else:
-            pass
+            msg = "The {} did {} damage to {} ({}). {} has {}hp left.".format(self.name,
+                                                                              dmg, character.__class__.__name__, name,
+                                                                              character.__class__.__name__, hp)
+        return msg
 
     def get_hp(self):
         return self.stats["HP"]
