@@ -1,4 +1,5 @@
 from protocols_messages import *
+# ELEGIR INPUT O UTILS
 # import utils
 import socket
 from inputcontrol import *

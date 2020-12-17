@@ -45,7 +45,7 @@ class Characters:
     def set_alive(self, alive):
         self.stats["alive"] = alive
 
-    def attack(self, player, enemy, dmg, round, name):
+    def attack(self, enemy, dmg, round, name):
         hp = enemy.stats["HP"]
         if enemy.stats["alive"]:
             if self.__class__.__name__ == "Procrastinator":
