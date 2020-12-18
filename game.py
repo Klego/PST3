@@ -23,8 +23,14 @@ class Game:
     def set_player(self, character, nick):
         self.dicPlayer[nick] = character
 
-    def get_dic_player(self, p):
-        return self.dicPlayer["Player " + str(p + 1)]
+    def get_dic_player(self, name):
+        return self.dicPlayer[name]
+
+    def set_turn(self, name):
+        self.check_turn.append(name)
+
+    def get_check_turn(self):
+        return self.check_turn
 
     @staticmethod
     def display_chars_menu():
@@ -49,11 +55,11 @@ class Game:
             character = Procrastinator()
         return character
 
-    def show_chars_attributes(self, name):
+    def show_chars_attributes(self):
         msg = ""
         if len(self.dicPlayer) > 0:
             for key in self.dicPlayer:
-                msg += key + " (" + name + ") - %s" % self.dicPlayer[key]
+                msg += " (" + key + ") - %s" % self.dicPlayer[key]
         return msg
 
     @staticmethod
@@ -105,37 +111,43 @@ class Game:
             enemy = self.enemies[n]
             msg = character.attack(enemy, dmg, self.current_round, name)
             return msg
+
     # comprobar ataque de los enemigos
-    def prepare_enemy_attack(self, enemy, name):
-        jug = name
+    def turn_enemy_attack(self):
+        jug = ""
+        x = ""
         msg = ""
+        for enemy in self.enemies:
+            if enemy.get_alive():
+                if self.__check_chars_alive():
+                    cont = 0
+                    n = random.randint(0, len(self.dicPlayer) - 1)
+                    for x in self.dicPlayer.keys():
+                        cont += 0
+                        if n == cont:
+                            jug = self.dicPlayer[x]
+                    while not jug.get_alive():
+                        n = random.randint(0, len(self.dicPlayer) - 1)
+                        for x in self.dicPlayer.keys():
+                            cont += 0
+                            if n == cont:
+                                jug = self.dicPlayer[x]
+                    if jug.get_alive():
+                        dmg = self.__random_damage(enemy.get_dmg())
+                        msg = enemy.attack(x, jug, dmg, self.current_stage)
+                    return msg
+
+    # comprobar bookworm
+    def heal(self, character, name):
+        jug = name
         cont = 0
         n = random.randint(0, len(self.dicPlayer) - 1)
         for x in self.dicPlayer.keys():
             cont += 1
             if n == cont:
                 jug = self.dicPlayer[x]
-        while not jug.get_alive():
-            n = random.randint(0, len(self.dicPlayer) - 1)
-            for x in self.dicPlayer.keys():
-                cont += 1
-                if n == cont:
-                    jug = self.dicPlayer[x]
-        if jug.get_alive():
-            dmg = self.__random_damage(enemy.get_dmg())
-            msg = enemy.attack(name, jug, dmg, self.current_stage)
-        return msg
-    # comprobar bookworm
-    def heal(self, character, name):
-        jug = name
-        cont = 0
-        n = random.randint(0, len(self.dicPlayer)-1)
-        for x in self.dicPlayer.keys():
-            cont += 1
-            if n == cont:
-                jug = self.dicPlayer[x]
         while not jug.get_alive() or jug.get_hp() == jug.get_hp_max():
-            n = random.randint(0, len(self.dicPlayer)-1)
+            n = random.randint(0, len(self.dicPlayer) - 1)
             for x in self.dicPlayer.keys():
                 cont += 1
                 if n == cont:
@@ -151,7 +163,7 @@ class Game:
         msg = "The {} has been healed with the following cure: {}. Current HP: {}.".format(name, cure, hp)
         return msg
 
-    def char_resurrect(self, list_to_revive, option, character):
+    def char_resurrect(self, list_to_revive, option, name):
         msg = ""
         in_revive = option
         for i in range(0, len(list_to_revive)):
@@ -159,6 +171,7 @@ class Game:
                 revive_player = list_to_revive[int(in_revive) - 1]
                 self.dicPlayer[revive_player].set_hp_max()
                 self.dicPlayer[revive_player].set_alive(True)
+                character = self.dicPlayer[name]
                 character.set_timeskill(0)
                 msg = "OMG!!!!! This player is alive again!!!!! \n{}".format(self.dicPlayer[revive_player])
         return msg
