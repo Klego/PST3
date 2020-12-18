@@ -146,6 +146,15 @@ def init_game(game, name, c_socket):
     send_message(new_msg, c_socket)
     send_turn(c_socket, game, name)
 
+def check_player_attack(game):
+    all_players_attacked = False
+    if len(game.get_check_turn()) < game.get_players():
+        all_players_attacked = False
+    else:
+        all_players_attacked = True
+
+    return all_players_attacked
+
 
 def check_player_attack(game):
     all_players_attacked = False
@@ -212,6 +221,7 @@ def manage_bookworm(msg, name, c_address, c_socket):
     else:
         server_reply = craft_continue()
         broadcast_clients(id_game, server_reply, c_address)
+
 
 
 def enemies_turn(id_game):

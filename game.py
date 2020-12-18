@@ -32,6 +32,12 @@ class Game:
     def get_check_turn(self):
         return self.check_turn
 
+    def set_turn(self, name):
+        self.check_turn.append(name)
+
+    def get_check_turn(self):
+        return self.check_turn
+
     @staticmethod
     def display_chars_menu():
         chars_list = [Bookworm, Worker, Whatsapper, Procrastinator]
