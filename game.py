@@ -26,6 +26,12 @@ class Game:
     def get_dic_player(self, p):
         return self.dicPlayer["Player " + str(p + 1)]
 
+    def set_turn(self, name):
+        self.check_turn.append(name)
+
+    def get_check_turn(self):
+        return self.check_turn
+
     @staticmethod
     def display_chars_menu():
         chars_list = [Bookworm, Worker, Whatsapper, Procrastinator]
@@ -151,7 +157,7 @@ class Game:
         msg = "The {} has been healed with the following cure: {}. Current HP: {}.".format(name, cure, hp)
         return msg
 
-    def char_resurrect(self, list_to_revive, option, character):
+    def char_resurrect(self, list_to_revive, option, name):
         msg = ""
         in_revive = option
         for i in range(0, len(list_to_revive)):
@@ -159,6 +165,7 @@ class Game:
                 revive_player = list_to_revive[int(in_revive) - 1]
                 self.dicPlayer[revive_player].set_hp_max()
                 self.dicPlayer[revive_player].set_alive(True)
+                character = self.dicPlayer[name]
                 character.set_timeskill(0)
                 msg = "OMG!!!!! This player is alive again!!!!! \n{}".format(self.dicPlayer[revive_player])
         return msg
