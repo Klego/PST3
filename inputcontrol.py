@@ -7,7 +7,8 @@ MAX_STAGES = 10
 IP = "127.0.0.1"
 PORT_CLIENT = 8080
 PORT_SERVER = 6123
-
+MIN_PORT = 1024
+MAX_PORT = 4096
 
 class ArgumentError(Exception):
     pass
@@ -46,7 +47,7 @@ def parse_args_client():
 def check_port(port):
     correct_port = False
     try:
-        if int(port):
+        if MIN_PORT <= int(port) < MAX_PORT:
             correct_port = True
             return int(port)
     except ValueError:

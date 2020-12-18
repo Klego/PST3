@@ -32,11 +32,6 @@ class Game:
     def get_check_turn(self):
         return self.check_turn
 
-    def set_turn(self, name):
-        self.check_turn.append(name)
-
-    def get_check_turn(self):
-        return self.check_turn
 
     @staticmethod
     def display_chars_menu():
@@ -269,14 +264,14 @@ class Game:
                 new_msg = self.app_procrastinator_skill(character, message, name)
         return new_msg
 
-    def __turn(self, player, enemy):
+    #def __turn(self, player, enemy):
         # name esta mal
-        name = "XXX"
-        if player is not None:
-            pass
+        #name = "XXX"
+        #if player is not None:
+            #pass
         #     AQUi iba la funcion choose_character_option
-        elif enemy is not None:
-            self.prepare_enemy_attack(enemy, name)
+        #elif enemy is not None:
+            #self.prepare_enemy_attack(enemy, name)
 
     def check_game(self):
         check_option = 0
