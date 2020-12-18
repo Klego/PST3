@@ -18,6 +18,8 @@ PROTOCOL_SEND_DC_ME = "Send_DC_Me"
 PROTOCOL_SEND_DC_SERVER = "Send_DC_SERVER"
 PROTOCOL_WAIT = "Wait"
 PROTOCOL_CONTINUE = "Continue"
+PROTOCOL_BOOKWORM_SEND = "Bookworm_Send"
+PROTOCOL_BOOKWORM_CHOOSE = "Bookworm_Choose"
 
 
 def craft_join(nick):
@@ -112,6 +114,22 @@ def craft_wait():
 
 def craft_continue():
     message = {"Protocol": PROTOCOL_CONTINUE}
+    return json.dumps(message).encode()
+
+
+def craft_bookworm_send(msg, resurrection_list):
+    options = []
+    option = 1
+    while option <= len(resurrection_list):
+        options.append(option)
+        option += 1
+
+    message = {"Protocol": PROTOCOL_BOOKWORM_SEND, "Message": msg, "Options": options, "List": resurrection_list}
+    return json.dumps(message).encode()
+
+
+def craft_bookworm_choose(option, resurrection_list):
+    message = {"Protocol": PROTOCOL_BOOKWORM_CHOOSE, "Option": option, "List": resurrection_list}
     return json.dumps(message).encode()
 
 
