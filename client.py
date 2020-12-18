@@ -107,6 +107,7 @@ try:
         except KeyboardInterrupt:
             client_reply = craft_send_dc_me()
             client_socket.sendall(client_reply)
+            client_socket.close()
             print("Program finished due to CTRL+C command.")
 
 except ConnectionResetError:
