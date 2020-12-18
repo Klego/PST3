@@ -8,8 +8,7 @@ from game import *
 import socket
 import threading
 from protocols_messages import *
-# ELEGIR INPUT O UTILS
-import utils
+import inputcontrol
 
 games = {}
 clients_games = {}
@@ -156,16 +155,6 @@ def check_player_attack(game):
     return all_players_attacked
 
 
-def check_player_attack(game):
-    all_players_attacked = False
-    if len(game.get_check_turn()) < game.get_players():
-        all_players_attacked = False
-    else:
-        all_players_attacked = True
-
-    return all_players_attacked
-
-
 def manage_send_character(client_thread, msg, c_address, c_socket, name):
     global clients_games
     global games
@@ -223,13 +212,21 @@ def manage_bookworm(msg, name, c_address, c_socket):
         broadcast_clients(id_game, server_reply, c_address)
 
 
+def send_to_all_players(id_game, server_reply):
+    global clients_games
+    global games
+    global dic_sockets
+    for i in clients_games.keys():
+        if clients_games[i] == id_game:
+            for j in dic_sockets.keys():
+                if j == i:
+                    dic_sockets[j].sendall(server_reply)
+
 
 def enemies_turn(id_game):
-    # Otra funcion
     msg = games[id_game].turn_enemy_attack()
     server_reply = craft_server_msg(msg)
-    # este broadcast no sirve, crear otro para TODOS
-    # broadcast_clients(id_game, server_reply, c_address)
+    send_to_all_players(id_game, server_reply)
 
 
 def manage_char_command(msg, c_address, c_socket, name):
@@ -256,7 +253,6 @@ def manage_char_command(msg, c_address, c_socket, name):
 
 
 # crear una funcion que chequee las rondas
-# Crear funcion que haga que los enemigos ataquen y envie el mensaje a todos los players
 
 # cOMPROBAR FUNCION
 def manage_game_choice(msg, c_socket, c_address, name):
@@ -359,12 +355,19 @@ class ServerSocketThread(threading.Thread):
 
 
 def main():
-    # controlar las excepciones
-    port = utils.arguments_parser_server()
-    server_socket_thread = ServerSocketThread(port)
-    server_socket_thread.daemon = True
-    server_socket_thread.start()
-    input("Server started at {}:{} \n".format("127.0.0.1", port))
+    try:
+        port = inputcontrol.parse_args_server()
+        inputcontrol.check_port(port)
+        server_socket_thread = ServerSocketThread(port)
+        server_socket_thread.daemon = True
+        server_socket_thread.start()
+        input("Server started at {}:{} \n".format("127.0.0.1", port))
+    except ConnectionResetError:
+        print("The connection to the client has been interrupted")
+    except ConnectionRefusedError:
+        print("Could not connect to the client")
+    except KeyboardInterrupt:
+        print("Program finished due to CTRL+C command.")
 
 
 if __name__ == "__main__":
