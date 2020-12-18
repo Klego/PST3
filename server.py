@@ -146,6 +146,15 @@ def init_game(game, name, c_socket):
     send_message(new_msg, c_socket)
     send_turn(c_socket, game, name)
 
+def check_player_attack(game):
+    all_players_attacked = False
+    if len(game.get_check_turn()) < game.get_players():
+        all_players_attacked = False
+    else:
+        all_players_attacked = True
+
+    return all_players_attacked
+
 
 def manage_send_character(client_thread, msg, c_address, c_socket, name):
     global clients_games
@@ -187,22 +196,45 @@ def manage_send_character(client_thread, msg, c_address, c_socket, name):
         manage_disconnection(reason, c_socket, client_thread)
 
 
+def manage_bookworm(msg, name, c_address, c_socket):
+    global games
+    global clients_games
+    option = msg["Option"]
+    resurrection_list = msg["List"]
+    id_game = clients_games[c_address]
+    server_reply = games[id_game].char_resurrect(resurrection_list, option, name)
+    games[id_game].set_turn(name)
+    send_message(server_reply, c_socket)
+    if not check_player_attack(games[id_game]):
+        server_reply = craft_wait()
+        c_socket.sendall(server_reply)
+    else:
+        server_reply = craft_continue()
+        broadcast_clients(id_game, server_reply, c_address)
+
+
 def manage_char_command(msg, c_address, c_socket, name):
     global games
     global clients_games
-    list_to_resurrect = []
     command = msg["Command"]
     id_game = clients_games[c_address]
     if games[id_game].dicPlayers[name].__class__.__name__ == "Bookworm" and command == "s":
         msg, list_to_resurrect = games[id_game].choose_character_option(command, name)
-        # PREPARAR PROTOCOLO MENSAJE ESPECIAL PARA BOOKWORM
+        # BOOKWORM'S SKILL SPECIAL MESSAGE PROTOCOL
+        server_reply = craft_bookworm_send(msg, list_to_resurrect)
+        c_socket.sendall(server_reply)
     else:
         msg = games[id_game].choose_character_option(command, name)
-    send_message(msg, c_socket)
-
+        send_message(msg, c_socket)
+        games[id_game].set_turn(name)
+        if not check_player_attack(games[id_game]):
+            server_reply = craft_wait()
+            c_socket.sendall(server_reply)
+        else:
+            server_reply = craft_continue()
+            broadcast_clients(id_game, server_reply, c_address)
 
 # crear una funcion que chequee las rondas
-# Crear funcion que chequea si el jugador ha pasado por aquí para que después ataquen los enemigos
 # Crear funcion que haga que los enemigos ataquen y envie el mensaje a todos los players
 
 # cOMPROBAR FUNCION
@@ -240,6 +272,15 @@ def manage_disconnected_player(client_thread):
     id_game = clients_games[client_thread.client_address]
     server_reply = craft_send_dc_server(reason)
     broadcast_clients(id_game, server_reply, client_thread.client_address)
+    for clients in clients_games.keys():
+        if clients_games[clients] == id_game:
+            del clients_games[client_thread.client_address]
+            del dic_sockets[client_thread.client_address]
+            print("(DC) " + players_names[client_thread.client_address] + "has been disconnected")
+            del players_names[client_thread.client_address]
+
+    print("SERVER: Game " + str(id_game) + " was finished because a player was disconnected.")
+    del games[id_game]
     client_thread.set_disconnected()
 
 
@@ -268,8 +309,8 @@ class ClientThread(threading.Thread):
             manage_game_choice(decoded_msg, self.client_socket, self.client_address, self.name)
         elif decoded_msg["Protocol"] == PROTOCOL_SEND_DC_ME:
             manage_disconnected_player(self)
-        # elif decoded_msg["Protocol"] == PROTOCOL_BOOKWORM_OPTION:
-        #     manage_bookworm(decoded_msg)
+        elif decoded_msg["Protocol"] == PROTOCOL_BOOKWORM_CHOOSE:
+            manage_bookworm(decoded_msg, self.name, self.client_address, self.client_socket)
 
     def run(self):
 
