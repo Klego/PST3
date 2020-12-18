@@ -111,4 +111,5 @@ except ConnectionRefusedError:
 except ArgumentError:
     print("Program finished due to bad arguments.")
 except KeyboardInterrupt:
+    # Enviar un mensaje para finalizar al servidor
     print("Program finished due to CTRL+C command.")

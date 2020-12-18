@@ -139,12 +139,22 @@ def game_check(c_socket, game, name):
 
 
 def init_game(game, name, c_socket):
-    message = game.show_chars_attributes(name)
+    message = game.show_chars_attributes()
     message += game.show_stage()
     message += game.show_round()
     new_msg = message.format("PLAYERS")
     send_message(new_msg, c_socket)
     send_turn(c_socket, game, name)
+
+def check_player_attack(game):
+    all_players_attacked = False
+    if len(game.get_check_turn()) < game.get_players():
+        all_players_attacked = False
+    else:
+        all_players_attacked = True
+
+    return all_players_attacked
+
 
 def check_player_attack(game):
     all_players_attacked = False
@@ -213,12 +223,21 @@ def manage_bookworm(msg, name, c_address, c_socket):
         broadcast_clients(id_game, server_reply, c_address)
 
 
+
+def enemies_turn(id_game):
+    # Otra funcion
+    msg = games[id_game].turn_enemy_attack()
+    server_reply = craft_server_msg(msg)
+    # este broadcast no sirve, crear otro para TODOS
+    # broadcast_clients(id_game, server_reply, c_address)
+
+
 def manage_char_command(msg, c_address, c_socket, name):
     global games
     global clients_games
     command = msg["Command"]
     id_game = clients_games[c_address]
-    if games[id_game].dicPlayers[name].__class__.__name__ == "Bookworm" and command == "s":
+    if games[id_game].dicPlayer[name].__class__.__name__ == "Bookworm" and command == "s":
         msg, list_to_resurrect = games[id_game].choose_character_option(command, name)
         # BOOKWORM'S SKILL SPECIAL MESSAGE PROTOCOL
         server_reply = craft_bookworm_send(msg, list_to_resurrect)
@@ -233,6 +252,8 @@ def manage_char_command(msg, c_address, c_socket, name):
         else:
             server_reply = craft_continue()
             broadcast_clients(id_game, server_reply, c_address)
+            enemies_turn(id_game)
+
 
 # crear una funcion que chequee las rondas
 # Crear funcion que haga que los enemigos ataquen y envie el mensaje a todos los players
@@ -261,6 +282,7 @@ def manage_game_choice(msg, c_socket, c_address, name):
         joined = False
         server_reply = craft_send_valid_game(joined)
         c_socket.sendall(server_reply)
+
 
 # BORRAR PLAYERS DESCONECTADOS DEL JUEGO siempre que se salga del juego (mirar otras funciones)
 # Y COMPROBAR FUNCION
@@ -337,6 +359,7 @@ class ServerSocketThread(threading.Thread):
 
 
 def main():
+    # controlar las excepciones
     port = utils.arguments_parser_server()
     server_socket_thread = ServerSocketThread(port)
     server_socket_thread.daemon = True

@@ -22,6 +22,7 @@ class Enemy:
             self.stats = {"HP": 15, "DMG": 7, "alive": True}
 
     def attack(self, name, character, dmg, stage):
+        msg = ""
         hp = character.stats["HP"]
         if self.name == "Theoretical class":
             dmg += stage
