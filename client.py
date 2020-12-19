@@ -108,6 +108,7 @@ try:
                 manage_wait()
             elif msg_client["Protocol"] == PROTOCOL_CONTINUE:
                 pass
+              
         except KeyboardInterrupt:
             client_reply = craft_send_dc_me()
             client_socket.sendall(client_reply)

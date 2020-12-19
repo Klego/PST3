@@ -264,6 +264,15 @@ class Game:
                 new_msg = self.app_procrastinator_skill(character, message, name)
         return new_msg
 
+    #def __turn(self, player, enemy):
+        # name esta mal
+        #name = "XXX"
+        #if player is not None:
+            #pass
+        #     AQUi iba la funcion choose_character_option
+        #elif enemy is not None:
+            #self.prepare_enemy_attack(enemy, name)
+
     def check_game(self):
         check_option = 0
         if self.__check_monsters_alive() and self.__check_chars_alive():

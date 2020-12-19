@@ -140,16 +140,6 @@ def init_game(game, name, c_socket):
     send_turn(c_socket, game, name)
 
 
-def check_player_attack(game):
-    all_players_attacked = False
-    if len(game.get_check_turn()) < game.get_players():
-        all_players_attacked = False
-    else:
-        all_players_attacked = True
-
-    return all_players_attacked
-
-
 def manage_send_character(client_thread, msg, c_address, c_socket, name):
     global clients_games
     global games
@@ -254,6 +244,10 @@ def game_check(client_thread, c_socket, id_game, name):
         server_reply = craft_send_end_game(win)
         c_socket.sendall(server_reply)
         client_thread.set_disconnected()
+        
+    msg = games[id_game].turn_enemy_attack()
+    server_reply = craft_server_msg(msg)
+    send_to_all_players(id_game, server_reply)
 
 
 def manage_char_command(client_thread, msg, c_address, c_socket, name):
@@ -284,6 +278,7 @@ def manage_char_command(client_thread, msg, c_address, c_socket, name):
             #     msg = "The {} ({}) has been defeated. It can not make any move until revived."
             #     new_msg = msg.format(games[id_game].get_dic_player(name).__class__.__name__, name)
             #     send_message(new_msg, c_socket)
+
 
 
 # cOMPROBAR FUNCION
@@ -389,11 +384,12 @@ class ServerSocketThread(threading.Thread):
 def main():
     try:
         port = inputcontrol.parse_args_server()
-        port = inputcontrol.check_port(port)
+        inputcontrol.check_port(port)
         server_socket_thread = ServerSocketThread(port)
         server_socket_thread.daemon = True
         server_socket_thread.start()
         input("Server started at {}:{} \n".format("127.0.0.1", port))
+        
     except inputcontrol.ArgumentError:
         print("Program finished due to bad arguments.")
     except ConnectionResetError:
