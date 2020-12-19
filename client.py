@@ -1,6 +1,7 @@
 from protocols_messages import *
 import socket
 from inputcontrol import *
+import json
 
 
 def manage_welcome(c_socket, players, stages):
@@ -68,9 +69,31 @@ def msg_join(c_socket, nick):
     send_name = craft_join(nick)
     c_socket.sendall(send_name)
 
+
 def manage_wait():
-    # Depende del wait se envian unos mensajes
-    print("Waiting for other players to join the game")
+    print("Waiting for other players")
+
+
+def manage_continue():
+    print("The game can continue")
+
+
+def manage_bookworm_send(msgc, c_socket):
+    msg = msgc["Message"]
+    options = msgc["Options"]
+    list_resurrect = msgc["List"]
+    choose = ""
+    if len(list_resurrect) > 0:
+        while choose not in str(options):
+            choose = input(msg)
+            if choose not in str(options):
+                print("Option not valid. Try again")
+            else:
+                reply = craft_bookworm_choose(choose, list_resurrect)
+                c_socket.sendall(reply)
+    else:
+        print(msg)
+
 
 try:
     n_players, n_stages, ip, port, name = parse_args_client()
@@ -84,7 +107,7 @@ try:
     while not finalize:
         try:
             msg_type = client_socket.recv(1024)
-            msg_client = decoded_msgs(msg_type)
+            msg_client = json.loads(msg_type.decode())
             if msg_client["Protocol"] == PROTOCOL_WELCOME:
                 manage_welcome(client_socket, n_players, n_stages)
             elif msg_client["Protocol"] == PROTOCOL_CHOOSE_CHARACTER:
@@ -108,6 +131,8 @@ try:
                 manage_wait()
             elif msg_client["Protocol"] == PROTOCOL_CONTINUE:
                 pass
+            elif msg_client["Protocol"] == PROTOCOL_BOOKWORM_SEND:
+                manage_bookworm_send(msg_client, client_socket)
         except KeyboardInterrupt:
             client_reply = craft_send_dc_me()
             client_socket.sendall(client_reply)
