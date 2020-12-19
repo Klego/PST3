@@ -17,6 +17,12 @@ dic_sockets = {}
 players_names = {}
 
 
+# BORRAR PLAYERS DESCONECTADOS DEL JUEGO siempre que se salga del juego (mirar otras funciones)
+# Y COMPROBAR FUNCION
+# me da error cuando ingreso un mensaje para enviar pero despues quiero que siga haciendo cosas
+# Recorrer los nombres de los jugadores para ponerlo linea 244
+
+
 def list_players_in_games():
     global games
     global clients_games
@@ -125,18 +131,6 @@ def send_turn(c_socket, game, name):
     c_socket.sendall(ask_turn)
 
 
-def game_check(c_socket, game, name):
-    check = game.check_game()
-    if check == 1:
-        send_turn(c_socket, game, name)
-    elif check == 2:
-        pass
-    elif check == 3:
-        pass
-    elif check == 4:
-        pass
-
-
 def init_game(game, name, c_socket):
     message = game.show_chars_attributes()
     message += game.show_stage()
@@ -144,6 +138,7 @@ def init_game(game, name, c_socket):
     new_msg = message.format("PLAYERS")
     send_message(new_msg, c_socket)
     send_turn(c_socket, game, name)
+
 
 def check_player_attack(game):
     all_players_attacked = False
@@ -224,12 +219,44 @@ def send_to_all_players(id_game, server_reply):
 
 
 def enemies_turn(id_game):
-    msg = games[id_game].turn_enemy_attack()
+    global games
+    msg = games[id_game].show_turn()
+    msg = msg.format('MONSTERS')
+    msg += "\n" + games[id_game].turn_enemy_attack()
     server_reply = craft_server_msg(msg)
     send_to_all_players(id_game, server_reply)
 
 
-def manage_char_command(msg, c_address, c_socket, name):
+def game_check(client_thread, c_socket, id_game, name):
+    global games
+    game = games[id_game]
+    check = game.check_game()
+    if check == 1:
+        # me da error cuando ingreso el mensaje de nueva ronda
+        # message = game.show_round()
+        # msg = message.format("PLAYERS")
+        # server_reply = craft_server_msg(msg)
+        # send_to_all_players(id_game, server_reply)
+        send_turn(c_socket, game, name)
+    elif check == 2:
+        pass
+    elif check == 3:
+        # Recorrer los nombres de los jugadores para ponerlo
+        print("(GAMEEND) {} game ended. They lost.".format(name))
+        win = False
+        server_reply = craft_send_end_game(win)
+        c_socket.sendall(server_reply)
+        client_thread.set_disconnected()
+    elif check == 4:
+        # Recorrer los nombres de los jugadores para ponerlo
+        print("(GAMEEND) {} game ended. They won.".format(name))
+        win = True
+        server_reply = craft_send_end_game(win)
+        c_socket.sendall(server_reply)
+        client_thread.set_disconnected()
+
+
+def manage_char_command(client_thread, msg, c_address, c_socket, name):
     global games
     global clients_games
     command = msg["Command"]
@@ -250,9 +277,14 @@ def manage_char_command(msg, c_address, c_socket, name):
             server_reply = craft_continue()
             broadcast_clients(id_game, server_reply, c_address)
             enemies_turn(id_game)
+            game_check(client_thread, c_socket, id_game, name)
+            # if games[id_game].get_dic_player(name).get_alive():
+            #
+            # else:
+            #     msg = "The {} ({}) has been defeated. It can not make any move until revived."
+            #     new_msg = msg.format(games[id_game].get_dic_player(name).__class__.__name__, name)
+            #     send_message(new_msg, c_socket)
 
-
-# crear una funcion que chequee las rondas
 
 # cOMPROBAR FUNCION
 def manage_game_choice(msg, c_socket, c_address, name):
@@ -322,7 +354,7 @@ class ClientThread(threading.Thread):
         elif decoded_msg["Protocol"] == PROTOCOL_SEND_CHARACTER:
             manage_send_character(self, decoded_msg, self.client_address, self.client_socket, self.name)
         elif decoded_msg["Protocol"] == PROTOCOL_SEND_CHARACTER_COMMAND:
-            manage_char_command(decoded_msg, self.client_address, self.client_socket, self.name)
+            manage_char_command(self, decoded_msg, self.client_address, self.client_socket, self.name)
         elif decoded_msg["Protocol"] == PROTOCOL_SEND_GAME_CHOICE:
             manage_game_choice(decoded_msg, self.client_socket, self.client_address, self.name)
         elif decoded_msg["Protocol"] == PROTOCOL_SEND_DC_ME:
@@ -357,11 +389,13 @@ class ServerSocketThread(threading.Thread):
 def main():
     try:
         port = inputcontrol.parse_args_server()
-        inputcontrol.check_port(port)
+        port = inputcontrol.check_port(port)
         server_socket_thread = ServerSocketThread(port)
         server_socket_thread.daemon = True
         server_socket_thread.start()
         input("Server started at {}:{} \n".format("127.0.0.1", port))
+    except inputcontrol.ArgumentError:
+        print("Program finished due to bad arguments.")
     except ConnectionResetError:
         print("The connection to the client has been interrupted")
     except ConnectionRefusedError:
