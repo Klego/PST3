@@ -120,9 +120,10 @@ def craft_continue():
 def craft_bookworm_send(msg, resurrection_list):
     options = []
     option = 1
-    while option <= len(resurrection_list):
-        options.append(option)
-        option += 1
+    if len(resurrection_list) > 0:
+        while option <= len(resurrection_list):
+            options.append(option)
+            option += 1
 
     message = {"Protocol": PROTOCOL_BOOKWORM_SEND, "Message": msg, "Options": options, "List": resurrection_list}
     return json.dumps(message).encode()
