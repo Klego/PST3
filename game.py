@@ -32,12 +32,6 @@ class Game:
     def get_check_turn(self):
         return self.check_turn
 
-    def set_turn(self, name):
-        self.check_turn.append(name)
-
-    def get_check_turn(self):
-        return self.check_turn
-
     @staticmethod
     def display_chars_menu():
         chars_list = [Bookworm, Worker, Whatsapper, Procrastinator]
@@ -140,8 +134,9 @@ class Game:
                                 jug = self.dicPlayer[x]
                     if jug.get_alive():
                         dmg = self.__random_damage(enemy.get_dmg())
-                        msg = enemy.attack(x, jug, dmg, self.current_stage)
-                    return msg
+                        msg += "\n" + enemy.attack(x, jug, dmg, self.current_stage)
+        msg += "\n+++++++++++++++++++++++++++++ End Round %s +++++++++++++++++++++++++++++" % self.current_round
+        return msg
 
     # comprobar bookworm
     def heal(self, character, name):
@@ -269,15 +264,6 @@ class Game:
                 new_msg = self.app_procrastinator_skill(character, message, name)
         return new_msg
 
-    def __turn(self, player, enemy):
-        # name esta mal
-        name = "XXX"
-        if player is not None:
-            pass
-        #     AQUi iba la funcion choose_character_option
-        elif enemy is not None:
-            self.prepare_enemy_attack(enemy, name)
-
     def check_game(self):
         check_option = 0
         if self.__check_monsters_alive() and self.__check_chars_alive():
@@ -287,14 +273,9 @@ class Game:
             self.prepare_new_stage()
         if not self.__check_chars_alive() and self.__check_monsters_alive():
             check_option = 3
-            # print("All characters have been defeated. Try again. GAME OVER")
-        #     Win = False
         if not self.__check_monsters_alive() and self.current_stage == int(self.stages):
             check_option = 4
-            # print("All the stages have been cleared. CONGRATS! YOU WON THE GAME!")
         return check_option
-
-    #     Win = True
 
     def __play_round(self):
         while self.__check_monsters_alive() and self.__check_chars_alive():
@@ -330,17 +311,16 @@ class Game:
             print("Every character will be added +1/4 HP. These are the updated attributes of each player: ")
             self.show_chars_attributes()
 
+    def show_turn(self):
+        message = "\n\t\t\t\t---------------------------"
+        message += "\n\t\t\t\t     - {} TURN -"
+        message += "\n\t\t\t\t---------------------------"
+        return message
+
     def show_round(self):
         self.current_round += 1
         message = "\n+++++++++++++++++++++++++++++++ Round %s +++++++++++++++++++++++++++++++" % self.current_round
-        message += "\n\t\t\t\t---------------------------"
-        message += "\n\t\t\t\t     - {} TURN -"
-        message += "\n\t\t\t\t---------------------------"
-        # cambiar comprobacion si es turno de los jugadores o turno de los monstruos
-        # if self.__check_chars_alive():
-        #     new_msg = message.format('PLAYERS')
-        # if self.__check_monsters_alive():
-        #     new_msg = message.format('MONSTERS')
+        message += self.show_turn()
         return message
 
     def show_stage(self):
@@ -351,7 +331,3 @@ class Game:
                       "\n\t\t************************" % self.current_stage
             message += self.__create_monster()
             return message
-
-    def play(self):
-
-        self.__play_round()

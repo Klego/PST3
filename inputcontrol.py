@@ -5,9 +5,10 @@ MAX_PLAYERS = 4
 MIN_PLAYERS, MIN_STAGES = 1, 1
 MAX_STAGES = 10
 IP = "127.0.0.1"
-PORT_CLIENT = 8080
-PORT_SERVER = 6123
-
+PORT_CLIENT = 6123
+PORT_SERVER = 8080
+MIN_PORT = 1024
+MAX_PORT = 65535
 
 class ArgumentError(Exception):
     pass
@@ -46,7 +47,7 @@ def parse_args_client():
 def check_port(port):
     correct_port = False
     try:
-        if int(port):
+        if MIN_PORT <= int(port) < MAX_PORT:
             correct_port = True
             return int(port)
     except ValueError:

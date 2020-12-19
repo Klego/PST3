@@ -1,6 +1,4 @@
 from protocols_messages import *
-# ELEGIR INPUT O UTILS
-# import utils
 import socket
 from inputcontrol import *
 
@@ -29,8 +27,6 @@ def manage_choose_character(c_socket):
 
 def manage_msgserver():
     print(msg_client["Message"])
-
-#     depende del mensaje
 
 
 def manage_turn(c_socket):
@@ -72,6 +68,9 @@ def msg_join(c_socket, nick):
     send_name = craft_join(nick)
     c_socket.sendall(send_name)
 
+def manage_wait():
+    # Depende del wait se envian unos mensajes
+    print("Waiting for other players to join the game")
 
 try:
     n_players, n_stages, ip, port, name = parse_args_client()
@@ -83,33 +82,41 @@ try:
     msg_join(client_socket, name)
     finalize = False
     while not finalize:
-        msg_type = client_socket.recv(1024)
-        msg_client = decoded_msgs(msg_type)
-        if msg_client["Protocol"] == PROTOCOL_WELCOME:
-            manage_welcome(client_socket, n_players, n_stages)
-        elif msg_client["Protocol"] == PROTOCOL_CHOOSE_CHARACTER:
-            manage_choose_character(client_socket)
-        elif msg_client["Protocol"] == PROTOCOL_SERVER_MSG:
-            manage_msgserver()
-        elif msg_client["Protocol"] == PROTOCOL_YOUR_TURN:
-            manage_turn(client_socket)
-        elif msg_client["Protocol"] == PROTOCOL_SEND_GAMES:
-            manage_games(client_socket)
-        # elif msg_client["Protocol"] == PROTOCOL_SEND_VALID_GAME:
-        #     manage_valid_game()
-        # elif msg_client["Protocol"] == PROTOCOL_SEND_END_GAME:
-        #     manage_endgame()
-        #     finalize = True
-        elif msg_client["Protocol"] == PROTOCOL_SEND_DC_SERVER:
-            manage_dcserver()
-            finalize = True
-    client_socket.close()
+        try:
+            msg_type = client_socket.recv(1024)
+            msg_client = decoded_msgs(msg_type)
+            if msg_client["Protocol"] == PROTOCOL_WELCOME:
+                manage_welcome(client_socket, n_players, n_stages)
+            elif msg_client["Protocol"] == PROTOCOL_CHOOSE_CHARACTER:
+                manage_choose_character(client_socket)
+            elif msg_client["Protocol"] == PROTOCOL_SERVER_MSG:
+                manage_msgserver()
+            elif msg_client["Protocol"] == PROTOCOL_YOUR_TURN:
+                manage_turn(client_socket)
+            elif msg_client["Protocol"] == PROTOCOL_SEND_GAMES:
+                manage_games(client_socket)
+            # elif msg_client["Protocol"] == PROTOCOL_SEND_VALID_GAME:
+            #     manage_valid_game()
+            elif msg_client["Protocol"] == PROTOCOL_SEND_END_GAME:
+                manage_endgame()
+                finalize = True
+            elif msg_client["Protocol"] == PROTOCOL_SEND_DC_SERVER:
+                manage_dcserver()
+                finalize = True
+                client_socket.close()
+            elif msg_client["Protocol"] == PROTOCOL_WAIT:
+                manage_wait()
+            elif msg_client["Protocol"] == PROTOCOL_CONTINUE:
+                pass
+        except KeyboardInterrupt:
+            client_reply = craft_send_dc_me()
+            client_socket.sendall(client_reply)
+            client_socket.close()
+            print("Program finished due to CTRL+C command.")
+
 except ConnectionResetError:
     print("The connection to the server has been interrupted")
 except ConnectionRefusedError:
     print("Could not connect to the server. Are you sure you have provided the correct ip and port?")
 except ArgumentError:
     print("Program finished due to bad arguments.")
-except KeyboardInterrupt:
-    # Enviar un mensaje para finalizar al servidor
-    print("Program finished due to CTRL+C command.")
