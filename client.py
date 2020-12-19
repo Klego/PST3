@@ -28,9 +28,6 @@ def manage_choose_character(c_socket):
 def manage_msgserver():
     print(msg_client["Message"])
 
-#     depende del mensaje
-# Klego: Ya, no te jode ¬¬
-
 
 def manage_turn(c_socket):
     print(msg_client["Message"])
@@ -71,6 +68,9 @@ def msg_join(c_socket, nick):
     send_name = craft_join(nick)
     c_socket.sendall(send_name)
 
+def manage_wait():
+    # Depende del wait se envian unos mensajes
+    print("Waiting for other players to join the game")
 
 try:
     n_players, n_stages, ip, port, name = parse_args_client()
@@ -97,13 +97,18 @@ try:
                 manage_games(client_socket)
             # elif msg_client["Protocol"] == PROTOCOL_SEND_VALID_GAME:
             #     manage_valid_game()
-            # elif msg_client["Protocol"] == PROTOCOL_SEND_END_GAME:
-            #     manage_endgame()
-            #     finalize = True
+            elif msg_client["Protocol"] == PROTOCOL_SEND_END_GAME:
+                manage_endgame()
+                finalize = True
             elif msg_client["Protocol"] == PROTOCOL_SEND_DC_SERVER:
                 manage_dcserver()
                 finalize = True
                 client_socket.close()
+            elif msg_client["Protocol"] == PROTOCOL_WAIT:
+                manage_wait()
+            elif msg_client["Protocol"] == PROTOCOL_CONTINUE:
+                pass
+              
         except KeyboardInterrupt:
             client_reply = craft_send_dc_me()
             client_socket.sendall(client_reply)
