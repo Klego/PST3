@@ -32,6 +32,9 @@ class Game:
     def get_check_turn(self):
         return self.check_turn
 
+    def clean_check_turn(self):
+        self.check_turn.clear()
+
     @staticmethod
     def display_chars_menu():
         chars_list = [Bookworm, Worker, Whatsapper, Procrastinator]
@@ -167,14 +170,17 @@ class Game:
     def char_resurrect(self, list_to_revive, option, name):
         msg = ""
         in_revive = option
-        for i in range(0, len(list_to_revive)):
-            if (int(in_revive) - 1) == i:
-                revive_player = list_to_revive[int(in_revive) - 1]
-                self.dicPlayer[revive_player].set_hp_max()
-                self.dicPlayer[revive_player].set_alive(True)
-                character = self.dicPlayer[name]
-                character.set_timeskill(0)
-                msg = "OMG!!!!! This player is alive again!!!!! \n{}".format(self.dicPlayer[revive_player])
+        if len(list_to_revive) > 0:
+            for i in range(0, len(list_to_revive)):
+                if (int(in_revive) - 1) == i:
+                    revive_player = list_to_revive[int(in_revive) - 1]
+                    self.dicPlayer[revive_player].set_hp_max()
+                    self.dicPlayer[revive_player].set_alive(True)
+                    character = self.dicPlayer[name]
+                    character.set_timeskill(0)
+                    msg = "OMG!!!!! This player is alive again!!!!! \n{}".format(self.dicPlayer[revive_player])
+        else:
+            pass
         return msg
 
     def app_bookworm_skill(self, character):
@@ -189,7 +195,10 @@ class Game:
                 msg += "{}. - {}".format(aux_count, self.dicPlayer[p])
                 aux_count += 1
         msg += "********************************************************"
-        msg += "Who do you want to revive? "
+        if len(list_to_revive) > 0:
+            msg += "Who do you want to revive? "
+        else:
+            msg = "There isn't anyone dead to revive"
         return msg, list_to_revive
 
     def app_worker_skill(self, character, message, name):
@@ -307,9 +316,12 @@ class Game:
                 self.dicPlayer[player].set_used_skill(False)
                 self.dicPlayer[player].set_timeskill(0)
         if self.current_stage < int(self.stages):
-            print("Players won this level. Continue next stage.")
-            print("Every character will be added +1/4 HP. These are the updated attributes of each player: ")
-            self.show_chars_attributes()
+            msg = "Players won this level. Continue next stage."
+            msg += "Every character will be added +1/4 HP. These are the updated attributes of each player: "
+            msg += self.show_chars_attributes()
+        else:
+            msg = "STAGES_CLEARED"
+        return msg
 
     def show_turn(self):
         message = "\n\t\t\t\t---------------------------"
