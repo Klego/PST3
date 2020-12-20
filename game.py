@@ -147,10 +147,10 @@ class Game:
         cont = 0
         n = random.randint(0, len(self.dicPlayer) - 1)
         for x in self.dicPlayer.keys():
-            cont += 1
+            cont += 0
             if n == cont:
                 jug = self.dicPlayer[x]
-        while not jug.get_alive() or jug.get_hp() == jug.get_hp_max():
+        while (not jug.get_alive()) or (jug.get_hp() == jug.get_hp_max()):
             n = random.randint(0, len(self.dicPlayer) - 1)
             for x in self.dicPlayer.keys():
                 cont += 1
@@ -164,7 +164,7 @@ class Game:
         else:
             hp = hp
         jug.set_hp(hp)
-        msg = "The {} has been healed with the following cure: {}. Current HP: {}.".format(name, cure, hp)
+        msg = "\nThe {} has been healed with the following cure: {}. Current HP: {}.".format(name, cure, hp)
         return msg
 
     def char_resurrect(self, list_to_revive, option, name):
@@ -186,30 +186,31 @@ class Game:
     def app_bookworm_skill(self, character):
         list_to_revive = []
         players_name = ""
-        msg = "********************************************************"
+        msg = "\n********************************************************"
         aux_count = 1
         for p in self.dicPlayer:
             if self.dicPlayer[p] != character and not self.dicPlayer[p].get_alive():
                 list_to_revive.append(p)
                 players_name += p + ", "
-                msg += "{}. - {}".format(aux_count, self.dicPlayer[p])
+                msg += "\n{}. - {}".format(aux_count, self.dicPlayer[p])
                 aux_count += 1
-        msg += "********************************************************"
+        msg += "\n********************************************************"
         if len(list_to_revive) > 0:
-            msg += "Who do you want to revive? "
+            msg += "\nWho do you want to revive? "
         else:
-            msg = "There isn't anyone dead to revive"
+            msg = "\nThere isn't anyone dead to revive"
         return msg, list_to_revive
 
     def app_worker_skill(self, character, message, name):
         if character.get_timeskill() >= 3:
             msg = message.format(character.__class__.__name__, name)
-            dmg = (character.get_dmg() + self.__random_damage(character.get_damage())) * 1.5
+            dmg = (character.get_dmg() + self.__random_damage(character.get_dmg())) * 1.5
             msg += self.prepare_char_attack(character, dmg, name)
             character.set_timeskill(0)
         else:
-            msg = "The skill is currently in cooldown for {} more rounds.".format(
+            msg = "\nThe skill is currently in cooldown for {} more rounds.".format(
                 3 - character.get_timeskill())
+        #     Pedir otra vez comando si no se puede enviar
         return msg
 
     def app_whatsapper_skill(self, character, message, name):
@@ -221,12 +222,13 @@ class Game:
         if not_hp_max:
             if character.get_timeskill() >= 3:
                 new_msg = message.format(character.__class__.__name__, name)
-                new_msg += self.heal(character, name)
+                new_msg += "\n" + self.heal(character, name)
                 character.set_timeskill(0)
             else:
-                new_msg = "The skill is currently in cooldown for {} more rounds.".format(3 - character.get_timeskill())
+                new_msg = "\nThe skill is currently in cooldown for {} more rounds.".format(3 - character.get_timeskill())
         else:
-            new_msg = "All players have their maximum HP, so the skill will not be used."
+            # pedir otra vez el comando
+            new_msg = "\nAll players have their maximum HP, so the skill will not be used."
         return new_msg
 
     def app_procrastinator_skill(self, character, message, name):
@@ -238,7 +240,7 @@ class Game:
                     new_msg += character.attack(enemy, dmg, self.current_round, name)
             character.set_used_skill(True)
         else:
-            new_msg = "This skill can only be used after the third round of each stage " \
+            new_msg = "\nThis skill can only be used after the third round of each stage " \
                       "and once per stage, so it will not be used."
         return new_msg
 
@@ -279,7 +281,6 @@ class Game:
             check_option = 1
         if self.__check_chars_alive() and not self.__check_monsters_alive():
             check_option = 2
-            self.prepare_new_stage()
         if not self.__check_chars_alive() and self.__check_monsters_alive():
             check_option = 3
         if not self.__check_monsters_alive() and self.current_stage == int(self.stages):

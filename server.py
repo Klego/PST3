@@ -150,6 +150,7 @@ def init_game(game, name, c_socket):
 
 
 def check_player_attack(game):
+    print("entra?")
     all_players_attacked = False
     if len(game.get_check_turn()) < game.get_players():
         all_players_attacked = False
@@ -242,13 +243,14 @@ def game_check(client_thread, c_socket, id_game, name):
     game = games[id_game]
     check = game.check_game()
     if check == 1:
-        message = game.show_round()
-        msg = message.format("PLAYERS")
-        server_reply = craft_server_msg(msg)
-        send_to_all_players(id_game, server_reply)
+        # message = game.show_round()
+        # msg = message.format("PLAYERS")
+        # server_reply = craft_server_msg(msg)
+        # send_to_all_players(id_game, server_reply)
         send_turn(c_socket, game, name)
     elif check == 2:
-        pass
+        msg = game.prepare_new_stage()
+        send_message(msg)
     elif check == 3:
         players_in_game = list_players_names(id_game)
         for name in players_in_game:
@@ -402,7 +404,7 @@ class ClientThread(threading.Thread):
 
         while not self.end:
             message = self.client_socket.recv(1024)
-            msg_client = decoded_msgs(message)
+            msg_client = json.loads(message.decode())
             self.manage_msg(msg_client)
 
 
