@@ -126,15 +126,16 @@ class Game:
                     cont = 0
                     n = random.randint(0, len(self.dicPlayer) - 1)
                     for x in self.dicPlayer.keys():
-                        cont += 0
                         if n == cont:
                             jug = self.dicPlayer[x]
+                        cont += 1
                     while not jug.get_alive():
+                        cont = 0
                         n = random.randint(0, len(self.dicPlayer) - 1)
                         for x in self.dicPlayer.keys():
-                            cont += 0
                             if n == cont:
                                 jug = self.dicPlayer[x]
+                            cont += 1
                     if jug.get_alive():
                         dmg = self.__random_damage(enemy.get_dmg())
                         msg += "\n" + enemy.attack(x, jug, dmg, self.current_stage)
@@ -147,15 +148,16 @@ class Game:
         cont = 0
         n = random.randint(0, len(self.dicPlayer) - 1)
         for x in self.dicPlayer.keys():
-            cont += 0
             if n == cont:
                 jug = self.dicPlayer[x]
+            cont += 1
         while (not jug.get_alive()) or (jug.get_hp() == jug.get_hp_max()):
+            cont = 0
             n = random.randint(0, len(self.dicPlayer) - 1)
             for x in self.dicPlayer.keys():
-                cont += 1
                 if n == cont:
                     jug = self.dicPlayer[x]
+                cont += 1
         cure = character.get_dmg() * 2
         hp = jug.get_hp()
         hp += cure
