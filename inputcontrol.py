@@ -1,5 +1,6 @@
 import getopt
 import sys
+import os
 
 MAX_PLAYERS = 4
 MIN_PLAYERS, MIN_STAGES = 1, 1
@@ -10,8 +11,13 @@ PORT_SERVER = 8080
 MIN_PORT = 1024
 MAX_PORT = 65535
 
+
 class ArgumentError(Exception):
     pass
+
+
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 
 def parse_args_server():
