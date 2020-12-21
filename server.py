@@ -51,8 +51,8 @@ def broadcast_clients(id_game, server_reply, c_address):
         if clients_games[i] == id_game:
             for j in dic_sockets.keys():
                 if j == i and j != c_address:
-                    dic_sockets[j].sendall(server_reply)
-
+                    #dic_sockets[j].sendall(server_reply)
+                    send_one_message(dic_sockets[j], server_reply)
 
 def creator_name(id_game):
     list_names = []
@@ -77,12 +77,14 @@ def list_players_names(id_game):
 def manage_join(name, c_socket):
     print("(WELCOME) " + name + " joined the server")
     server_reply = craft_welcome()
-    c_socket.sendall(server_reply)
+    #c_socket.sendall(server_reply)
+    send_one_message(c_socket, server_reply)
 
 
 def manage_disconnection(reason, c_socket, client_thread):
     server_reply = craft_send_dc_server(reason)
-    c_socket.sendall(server_reply)
+    #c_socket.sendall(server_reply)
+    send_one_message(c_socket, server_reply)
     client_thread.set_disconnected()
 
 
@@ -102,7 +104,8 @@ def manage_server_option(client_thread, msg, c_address, name, c_socket):
             awaiting_players[c_address] = id_game
             print("(CREATE) " + name + " created a game")
             server_reply = craft_choose_character()
-            c_socket.sendall(server_reply)
+            #c_socket.sendall(server_reply)
+            send_one_message(c_socket, server_reply)
         else:
             print("(EXIT) " + name + " disconnected by SERVER (No new game slots)")
             reason = "SERVER: There are no empty slots for a new game"
@@ -110,7 +113,8 @@ def manage_server_option(client_thread, msg, c_address, name, c_socket):
     elif option == "2":
         available_games = list_players_in_games()
         server_reply = craft_send_games(available_games)
-        c_socket.sendall(server_reply)
+        #c_socket.sendall(server_reply)
+        send_one_message(c_socket, server_reply)
     elif option == "3":
         print("(EXIT) " + name + " disconnected")
         reason = "SERVER: Client disconnected by himself"
@@ -132,12 +136,14 @@ def enter_game(c_address, id_game, c_socket, name, game, option):
 
 def send_message(msg, c_socket):
     message = craft_server_msg(msg)
-    c_socket.sendall(message)
+    #c_socket.sendall(message)
+    send_one_message(c_socket, message)
 
 
 def send_turn(c_socket, game, name):
     ask_turn = craft_your_turn(game.get_dic_player(name), name)
-    c_socket.sendall(ask_turn)
+    #c_socket.sendall(ask_turn)
+    send_one_message(c_socket, ask_turn)
 
 
 def init_game(game, name, c_socket):
@@ -188,7 +194,8 @@ def manage_send_character(client_thread, msg, c_address, c_socket, name):
                     players_count += 1
             if players_count < players:
                 server_reply = craft_wait()
-                c_socket.sendall(server_reply)
+                #c_socket.sendall(server_reply)
+                send_one_message(c_socket, server_reply)
             else:
                 # BROADCAST SENDALL TO THE CLIENTS CONNECTED TO THE GAME
                 server_reply = craft_continue()
@@ -212,7 +219,8 @@ def manage_bookworm(msg, name, c_address, c_socket):
     send_message(server_reply, c_socket)
     if not check_player_attack(games[id_game]):
         server_reply = craft_wait()
-        c_socket.sendall(server_reply)
+        #c_socket.sendall(server_reply)
+        send_one_message(c_socket, server_reply)
     else:
         server_reply = craft_continue()
         broadcast_clients(id_game, server_reply, c_address)
@@ -226,7 +234,8 @@ def send_to_all_players(id_game, server_reply):
         if clients_games[i] == id_game:
             for j in dic_sockets.keys():
                 if j == i:
-                    dic_sockets[j].sendall(server_reply)
+                    #dic_sockets[j].sendall(server_reply)
+                    send_one_message(dic_sockets[j], server_reply)
 
 
 def enemies_turn(id_game):
@@ -243,10 +252,10 @@ def game_check(client_thread, c_socket, id_game, name):
     game = games[id_game]
     check = game.check_game()
     if check == 1:
-        # message = game.show_round()
-        # msg = message.format("PLAYERS")
-        # server_reply = craft_server_msg(msg)
-        # send_to_all_players(id_game, server_reply)
+        message = game.show_round()
+        msg = message.format("PLAYERS")
+        server_reply = craft_server_msg(msg)
+        send_to_all_players(id_game, server_reply)
         send_turn(c_socket, game, name)
     elif check == 2:
         msg = game.prepare_new_stage()
@@ -280,14 +289,17 @@ def manage_char_command(client_thread, msg, c_address, c_socket, name):
             if len(list_to_resurrect) > 0:
                 # BOOKWORM'S SKILL SPECIAL MESSAGE PROTOCOL
                 server_reply = craft_bookworm_send(msg, list_to_resurrect)
-                c_socket.sendall(server_reply)
+                #c_socket.sendall(server_reply)
+                send_one_message(c_socket, server_reply)
             else:
                 server_reply = craft_server_msg(msg)
-                c_socket.sendall(server_reply)
+                #c_socket.sendall(server_reply)
+                send_one_message(c_socket, server_reply)
                 games[id_game].set_turn(name)
                 if not check_player_attack(games[id_game]):
                     server_reply = craft_wait()
-                    c_socket.sendall(server_reply)
+                    #c_socket.sendall(server_reply)
+                    send_one_message(c_socket, server_reply)
                 else:
                     server_reply = craft_continue()
                     broadcast_clients(id_game, server_reply, c_address)
@@ -297,7 +309,8 @@ def manage_char_command(client_thread, msg, c_address, c_socket, name):
             games[id_game].set_turn(name)
             if not check_player_attack(games[id_game]):
                 server_reply = craft_wait()
-                c_socket.sendall(server_reply)
+                #c_socket.sendall(server_reply)
+                send_one_message(c_socket, server_reply)
             else:
                 server_reply = craft_continue()
                 broadcast_clients(id_game, server_reply, c_address)
@@ -311,7 +324,8 @@ def manage_char_command(client_thread, msg, c_address, c_socket, name):
         games[id_game].set_turn(name)
         if not check_player_attack(games[id_game]):
             server_reply = craft_wait()
-            c_socket.sendall(server_reply)
+            #c_socket.sendall(server_reply)
+            send_one_message(c_socket, server_reply)
         else:
             server_reply = craft_continue()
             broadcast_clients(id_game, server_reply, c_address)
@@ -339,15 +353,18 @@ def manage_game_choice(msg, c_socket, c_address, name):
     if num_players < players:
         joined = True
         server_reply = craft_send_valid_game(joined)
-        c_socket.sendall(server_reply)
+        #c_socket.sendall(server_reply)
+        send_one_message(c_socket, server_reply)
         awaiting_players[c_address] = option
         print("(JOIN) " + name + " joined " + creator_name(option) + "'s game")
         server_reply = craft_choose_character()
-        c_socket.sendall(server_reply)
+        #c_socket.sendall(server_reply)
+        send_one_message(c_socket, server_reply)
     else:
         joined = False
         server_reply = craft_send_valid_game(joined)
-        c_socket.sendall(server_reply)
+        #c_socket.sendall(server_reply)
+        send_one_message(c_socket, server_reply)
 
 
 # BORRAR PLAYERS DESCONECTADOS DEL JUEGO siempre que se salga del juego (mirar otras funciones)
@@ -403,7 +420,7 @@ class ClientThread(threading.Thread):
     def run(self):
 
         while not self.end:
-            message = self.client_socket.recv(1024)
+            message = recv_one_message(self.client_socket)
             msg_client = json.loads(message.decode())
             self.manage_msg(msg_client)
 
