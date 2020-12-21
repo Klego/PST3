@@ -97,11 +97,14 @@ def craft_send_character_command(command):
 
 
 def craft_send_games(game_list):
-    options = [1, 2, 3, 4]
-    msg = "-----------------------------------------------\n" + "Available games\n" \
-          + "-----------------------------------------------\n" + game_list + "\n" \
-          + "-----------------------------------------------\n"
-
+    options = ["1", "2", "3", "4"]
+    if game_list != "NO_GAMES":
+        msg = "-----------------------------------------------\n" + "Available games\n" \
+            + "-----------------------------------------------\n" + game_list + "\n" \
+            + "-----------------------------------------------\n"
+    else:
+        msg = "There are no games available. Please, create a new game.\n"
+        options = "0"
     message = {"Protocol": PROTOCOL_SEND_GAMES, "Message": msg, "Options_Range": options}
     return json.dumps(message).encode()
 

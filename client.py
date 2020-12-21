@@ -4,6 +4,12 @@ from inputcontrol import *
 import json
 
 
+def msg_join(c_socket, nick):
+    send_name = craft_join(nick)
+    #c_socket.sendall(send_name)
+    send_one_message(c_socket, send_name)
+
+
 def manage_welcome(c_socket, players, stages):
     print(msg_client["Message"])
     send_option = ""
@@ -44,18 +50,28 @@ def manage_turn(c_socket):
     send_one_message(c_socket, send_command)
 
 
-def manage_games(c_socket):
-    print(msg_client["Message"])
-    selected_game = ""
-    while selected_game not in msg_client["Options_Range"]:
-        selected_game = input("Choose one option: ")
-    send_selected = craft_send_game_choice(selected_game)
-    #c_socket.sendall(send_selected)
-    send_one_message(c_socket, send_selected)
+def manage_send_games(c_socket, nick):
+    msg = msg_client["Message"]
+    options = msg_client["Options_Range"]
+    if options == "0":
+        print(msg)
+        msg_join(c_socket, nick)
+    else:
+        print(msg)
+        choice = ""
+        while choice not in msg_client["Options_Range"]:
+            choice = input("Choose one option: ")
+            if choice not in msg_client["Options_Range"]:
+                print("Option not valid. Try again")
+        client_reply = craft_send_game_choice(choice)
+        send_one_message(c_socket, client_reply)
 
 
-def manage_valid_game():
-    print(msg_client["Message"])
+def manage_valid_game(c_socket, nick):
+    joined = msg_client["Joined"]
+    if not joined:
+        print("You won't be able to join the game, select a new game or create any other game if possible")
+        msg_join(c_socket, nick)
 
 
 def manage_endgame():
@@ -68,11 +84,6 @@ def manage_endgame():
 def manage_dcserver():
     print(msg_client["Reason"])
 
-
-def msg_join(c_socket, nick):
-    send_name = craft_join(nick)
-    #c_socket.sendall(send_name)
-    send_one_message(c_socket, send_name)
 
 def manage_wait():
     print("Waiting for other players")
@@ -123,9 +134,9 @@ try:
                 elif msg_client["Protocol"] == PROTOCOL_YOUR_TURN:
                     manage_turn(client_socket)
                 elif msg_client["Protocol"] == PROTOCOL_SEND_GAMES:
-                    manage_games(client_socket)
-                # elif msg_client["Protocol"] == PROTOCOL_SEND_VALID_GAME:
-                #     manage_valid_game()
+                    manage_send_games(client_socket, name)
+                elif msg_client["Protocol"] == PROTOCOL_SEND_VALID_GAME:
+                    manage_valid_game(client_socket, name)
                 elif msg_client["Protocol"] == PROTOCOL_SEND_END_GAME:
                     manage_endgame()
                     finalize = True
