@@ -198,7 +198,7 @@ class Game:
         if len(list_to_revive) > 0:
             msg += "\nWho do you want to revive? "
         else:
-            msg = "\nThere isn't anyone dead to revive"
+            msg = "\nThere isn't anyone dead to revive.\n You have lost a turn. :)"
         return msg, list_to_revive
 
     def app_worker_skill(self, character, message, name):
@@ -208,7 +208,7 @@ class Game:
             msg += self.prepare_char_attack(character, dmg, name)
             character.set_timeskill(0)
         else:
-            msg = "\nThe skill is currently in cooldown for {} more rounds.".format(
+            msg = "\nThe skill is currently in cooldown for {} more rounds.\n You have lost a turn. :)".format(
                 3 - character.get_timeskill())
         #     Pedir otra vez comando si no se puede enviar
         return msg
@@ -225,10 +225,11 @@ class Game:
                 new_msg += "\n" + self.heal(character, name)
                 character.set_timeskill(0)
             else:
-                new_msg = "\nThe skill is currently in cooldown for {} more rounds.".format(3 - character.get_timeskill())
+                new_msg = "\nThe skill is currently in cooldown for {} more rounds. \n You have lost a turn. :)"\
+                    .format(3 - character.get_timeskill())
         else:
             # pedir otra vez el comando
-            new_msg = "\nAll players have their maximum HP, so the skill will not be used."
+            new_msg = "\nAll players have their maximum HP, so the skill will not be used.\n You have lost a turn. :)"
         return new_msg
 
     def app_procrastinator_skill(self, character, message, name):
@@ -241,7 +242,7 @@ class Game:
             character.set_used_skill(True)
         else:
             new_msg = "\nThis skill can only be used after the third round of each stage " \
-                      "and once per stage, so it will not be used."
+                      "and once per stage, so it will not be used. \n You have lost a turn. :)"
         return new_msg
 
     def choose_character_option(self, option, name):
@@ -263,10 +264,10 @@ class Game:
                         new_msg += msg_book
                         return new_msg, list_to_revive
                     else:
-                        new_msg = "The skill is currently in cooldown for {} more rounds.".format(
+                        new_msg = "The skill is currently in cooldown for {} more rounds.\n You have lost a turn. :)".format(
                             4 - character.get_timeskill())
                 else:
-                    new_msg = "All players are alive, so the skill will not be used."
+                    new_msg = "All players are alive, so the skill will not be used.\n You have lost a turn. :)"
             elif character.__class__.__name__ == Worker.__name__:
                 new_msg = self.app_worker_skill(character, message, name)
             elif character.__class__.__name__ == Whatsapper.__name__:
