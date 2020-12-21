@@ -195,8 +195,8 @@ def clear_dicts(id_game):
             del dic_sockets[player]
             del players_names[player]
             del dic_sockets[player]
-            del clients_games[player]
             del dic_threads[player]
+            del clients_games[player]
     del games[id_game]
 
 def check_player_attack(game):
