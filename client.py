@@ -6,7 +6,6 @@ import json
 
 def msg_join(c_socket, nick):
     send_name = craft_join(nick)
-    #c_socket.sendall(send_name)
     send_one_message(c_socket, send_name)
 
 
@@ -18,7 +17,6 @@ def manage_welcome(c_socket, players, stages):
         if send_option not in msg_client["Option_Range"]:
             print("Option must be between 1 and 3. Try again")
     reply_welcome = craft_send_server_option(send_option, players, stages)
-    #c_socket.sendall(reply_welcome)
     send_one_message(c_socket, reply_welcome)
 
 
@@ -30,11 +28,10 @@ def manage_choose_character(c_socket):
         if choose_character not in msg_client["Options_Range"]:
             print("The characters options are between 1 and 4. Try again")
     send_character = craft_send_character(choose_character)
-    #c_socket.sendall(send_character)
     send_one_message(c_socket, send_character)
 
 
-def manage_msgserver():
+def manage_msg_server():
     print(msg_client["Message"])
 
 
@@ -46,7 +43,6 @@ def manage_turn(c_socket):
         if command not in msg_client["Range_Options"]:
             print("Option not valid. Try again")
     send_command = craft_send_character_command(command)
-    #c_socket.sendall(send_command)
     send_one_message(c_socket, send_command)
 
 
@@ -63,8 +59,8 @@ def manage_send_games(c_socket, nick):
             choice = input("Choose one option: ")
             if choice not in msg_client["Options_Range"]:
                 print("Option not valid. Try again")
-        client_reply = craft_send_game_choice(choice)
-        send_one_message(c_socket, client_reply)
+        reply = craft_send_game_choice(choice)
+        send_one_message(c_socket, reply)
 
 
 def manage_valid_game(c_socket, nick):
@@ -105,7 +101,6 @@ def manage_bookworm_send(msgc, c_socket):
                 print("Option not valid. Try again")
             else:
                 reply = craft_bookworm_choose(choose, list_resurrect)
-                #c_socket.sendall(reply)
                 send_one_message(c_socket, reply)
     else:
         print(msg)
@@ -125,13 +120,13 @@ try:
         try:
             msg_type = recv_one_message(client_socket)
             if msg_type is not None or msg_type != '':
-                msg_client = json.loads(msg_type.decode())
+                msg_client = decoded_msgs(msg_type)
                 if msg_client["Protocol"] == PROTOCOL_WELCOME:
                     manage_welcome(client_socket, n_players, n_stages)
                 elif msg_client["Protocol"] == PROTOCOL_CHOOSE_CHARACTER:
                     manage_choose_character(client_socket)
                 elif msg_client["Protocol"] == PROTOCOL_SERVER_MSG:
-                    manage_msgserver()
+                    manage_msg_server()
                 elif msg_client["Protocol"] == PROTOCOL_YOUR_TURN:
                     manage_turn(client_socket)
                 elif msg_client["Protocol"] == PROTOCOL_SEND_GAMES:
@@ -153,7 +148,6 @@ try:
                     manage_bookworm_send(msg_client, client_socket)
         except KeyboardInterrupt:
             client_reply = craft_send_dc_me()
-            #client_socket.sendall(client_reply)
             send_one_message(client_socket, client_reply)
             client_socket.close()
             print("Program finished due to CTRL+C command.")

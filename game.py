@@ -62,7 +62,7 @@ class Game:
         msg = ""
         if len(self.dicPlayer) > 0:
             for key in self.dicPlayer:
-                msg += " (" + key + ") - %s" % self.dicPlayer[key]
+                msg += "\n (" + key + ") - %s" % self.dicPlayer[key]
         return msg
 
     @staticmethod
@@ -115,49 +115,35 @@ class Game:
             msg = character.attack(enemy, dmg, self.current_round, name)
             return msg
 
-    # comprobar ataque de los enemigos
-    def turn_enemy_attack(self):
+    def __random_char(self):
         jug = ""
-        x = ""
-        msg = ""
-        for enemy in self.enemies:
-            if enemy.get_alive():
-                if self.__check_chars_alive():
-                    cont = 0
-                    n = random.randint(0, len(self.dicPlayer) - 1)
-                    for x in self.dicPlayer.keys():
-                        if n == cont:
-                            jug = self.dicPlayer[x]
-                        cont += 1
-                    while not jug.get_alive():
-                        cont = 0
-                        n = random.randint(0, len(self.dicPlayer) - 1)
-                        for x in self.dicPlayer.keys():
-                            if n == cont:
-                                jug = self.dicPlayer[x]
-                            cont += 1
-                    if jug.get_alive():
-                        dmg = self.__random_damage(enemy.get_dmg())
-                        msg += "\n" + enemy.attack(x, jug, dmg, self.current_stage)
-        msg += "\n+++++++++++++++++++++++++++++ End Round %s +++++++++++++++++++++++++++++" % self.current_round
-        return msg
-
-    # comprobar bookworm
-    def heal(self, character, name):
-        jug = name
         cont = 0
         n = random.randint(0, len(self.dicPlayer) - 1)
         for x in self.dicPlayer.keys():
             if n == cont:
                 jug = self.dicPlayer[x]
             cont += 1
+        return jug
+
+    def turn_enemy_attack(self):
+        x = ""
+        msg = ""
+        for enemy in self.enemies:
+            if enemy.get_alive():
+                if self.__check_chars_alive():
+                    jug = self.__random_char()
+                    while not jug.get_alive():
+                        jug = self.__random_char()
+                    if jug.get_alive():
+                        dmg = self.__random_damage(enemy.get_dmg())
+                        msg += "\n" + enemy.attack(x, jug, dmg, self.current_stage)
+        msg += "\n+++++++++++++++++++++++++++++ End Round %s +++++++++++++++++++++++++++++" % self.current_round
+        return msg
+
+    def heal(self, character, name):
+        jug = self.__random_char()
         while (not jug.get_alive()) or (jug.get_hp() == jug.get_hp_max()):
-            cont = 0
-            n = random.randint(0, len(self.dicPlayer) - 1)
-            for x in self.dicPlayer.keys():
-                if n == cont:
-                    jug = self.dicPlayer[x]
-                cont += 1
+            jug = self.__random_char()
         cure = character.get_dmg() * 2
         hp = jug.get_hp()
         hp += cure
@@ -212,7 +198,6 @@ class Game:
         else:
             msg = "\nThe skill is currently in cooldown for {} more rounds.\n You have lost a turn. :)".format(
                 3 - character.get_timeskill())
-        #     Pedir otra vez comando si no se puede enviar
         return msg
 
     def app_whatsapper_skill(self, character, message, name):
@@ -227,10 +212,9 @@ class Game:
                 new_msg += "\n" + self.heal(character, name)
                 character.set_timeskill(0)
             else:
-                new_msg = "\nThe skill is currently in cooldown for {} more rounds. \n You have lost a turn. :)"\
+                new_msg = "\nThe skill is currently in cooldown for {} more rounds. \n You have lost a turn. :)" \
                     .format(3 - character.get_timeskill())
         else:
-            # pedir otra vez el comando
             new_msg = "\nAll players have their maximum HP, so the skill will not be used.\n You have lost a turn. :)"
         return new_msg
 
@@ -248,7 +232,6 @@ class Game:
         return new_msg
 
     def choose_character_option(self, option, name):
-        list_to_revive = []
         new_msg = ""
         character = self.dicPlayer[name]
         character.update_timeskill()
@@ -257,7 +240,7 @@ class Game:
             msg = self.prepare_char_attack(character, dmg, name)
             return msg
         elif option.lower() == "s":
-            message = "The {} ({}) used his/her skill."
+            message = "\nThe {} ({}) used his/her skill."
             if character.__class__.__name__ == Bookworm.__name__:
                 if self.__check_chars_dead():
                     if character.get_timeskill() >= 4:
@@ -266,10 +249,10 @@ class Game:
                         new_msg += msg_book
                         return new_msg, list_to_revive
                     else:
-                        new_msg = "The skill is currently in cooldown for {} more rounds.\n You have lost a turn. :)".format(
-                            4 - character.get_timeskill())
+                        new_msg = "\nThe skill is currently in cooldown for {} more rounds." \
+                                  "\n You have lost a turn. :)".format(4 - character.get_timeskill())
                 else:
-                    new_msg = "All players are alive, so the skill will not be used.\n You have lost a turn. :)"
+                    new_msg = "\nAll players are alive, so the skill will not be used.\n You have lost a turn. :)"
             elif character.__class__.__name__ == Worker.__name__:
                 new_msg = self.app_worker_skill(character, message, name)
             elif character.__class__.__name__ == Whatsapper.__name__:
@@ -290,26 +273,6 @@ class Game:
             check_option = 4
         return check_option
 
-    def __play_round(self):
-        while self.__check_monsters_alive() and self.__check_chars_alive():
-
-            if self.__check_chars_alive():
-                for player in self.dicPlayer:
-                    if self.dicPlayer[player].get_alive():
-                        if self.__check_monsters_alive():
-                            self.__turn(player, None)
-                    else:
-                        print("The {} ({}) has been defeated. It can not make "
-                              "any move until revived.".format(self.dicPlayer[player].__class__.__name__, player))
-
-            # enemies turn
-            if self.__check_monsters_alive():
-                for enemy in self.enemies:
-                    if enemy.stats["alive"]:
-                        if self.__check_chars_alive():
-                            self.__turn(None, enemy)
-            print("+++++++++++++++++++++++++++++ End Round %s +++++++++++++++++++++++++++++" % self.current_round)
-
     def prepare_new_stage(self):
         self.enemies.clear()
         Enemy.numerated_monster = 1
@@ -320,14 +283,15 @@ class Game:
                 self.dicPlayer[player].set_used_skill(False)
                 self.dicPlayer[player].set_timeskill(0)
         if self.current_stage < int(self.stages):
-            msg = "Players won this level. Continue next stage."
-            msg += "Every character will be added +1/4 HP. These are the updated attributes of each player: "
+            msg = "\nPlayers won this level. Continue next stage."
+            msg += "\nEvery character will be added +1/4 HP. These are the updated attributes of each player: "
             msg += self.show_chars_attributes()
         else:
             msg = "STAGES_CLEARED"
         return msg
 
-    def show_turn(self):
+    @staticmethod
+    def show_turn():
         message = "\n\t\t\t\t---------------------------"
         message += "\n\t\t\t\t     - {} TURN -"
         message += "\n\t\t\t\t---------------------------"
