@@ -1,4 +1,6 @@
 import json
+import struct
+
 from game import *
 
 
@@ -20,6 +22,28 @@ PROTOCOL_WAIT = "Wait"
 PROTOCOL_CONTINUE = "Continue"
 PROTOCOL_BOOKWORM_SEND = "Bookworm_Send"
 PROTOCOL_BOOKWORM_CHOOSE = "Bookworm_Choose"
+
+
+def recvall(sock, count):
+    buf = b''
+    while count:
+        newbuf = sock.recv(count)
+        if not newbuf: return None
+        buf += newbuf
+        count -= len(newbuf)
+    return buf
+
+
+def recv_one_message(sock):
+    lengthbuf = recvall(sock, 4)
+    length, = struct.unpack('!I', lengthbuf)
+    return recvall(sock, length)
+
+
+def send_one_message(sock, data):
+    length = len(data)
+    sock.sendall(struct.pack('!I', length))
+    sock.sendall(data)
 
 
 def craft_join(nick):
@@ -73,11 +97,14 @@ def craft_send_character_command(command):
 
 
 def craft_send_games(game_list):
-    options = [1, 2, 3, 4]
-    msg = "-----------------------------------------------\n" + "Available games\n" \
-          + "-----------------------------------------------\n" + game_list + "\n" \
-          + "-----------------------------------------------\n"
-
+    options = ["1", "2", "3", "4"]
+    if game_list != "NO_GAMES":
+        msg = "-----------------------------------------------\n" + "Available games\n" \
+            + "-----------------------------------------------\n" + game_list + "\n" \
+            + "-----------------------------------------------\n"
+    else:
+        msg = "There are no games available. Please, create a new game.\n"
+        options = "0"
     message = {"Protocol": PROTOCOL_SEND_GAMES, "Message": msg, "Options_Range": options}
     return json.dumps(message).encode()
 
