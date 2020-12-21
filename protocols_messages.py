@@ -3,7 +3,6 @@ import struct
 
 from game import *
 
-
 PROTOCOL_JOIN = "Join"
 PROTOCOL_WELCOME = "Welcome"
 PROTOCOL_SEND_SERVER_OPTION = "Send_Server_Option"
@@ -28,7 +27,8 @@ def recvall(sock, count):
     buf = b''
     while count:
         newbuf = sock.recv(count)
-        if not newbuf: return None
+        if not newbuf:
+            return None
         buf += newbuf
         count -= len(newbuf)
     return buf
@@ -52,7 +52,6 @@ def craft_join(nick):
 
 
 def craft_welcome():
-    # options = [1, 2, 3]
     options = ["1", "2", "3"]
     init_menu = "Welcome to the server. Choose one of this options:\n" + "\t 1.- Create game\n" + "\t 2.- Join game\n" \
                 + "\t 3.- Exit\n "
@@ -66,8 +65,6 @@ def craft_send_server_option(option, players, stages):
 
 
 def craft_choose_character():
-    index = 1
-    # options = [1, 2, 3, 4]
     options = ["1", "2", "3", "4"]
     menu = Game.display_chars_menu()
     message = {"Protocol": PROTOCOL_CHOOSE_CHARACTER, "Message": menu, "Options_Range": options}
@@ -100,8 +97,8 @@ def craft_send_games(game_list):
     options = ["1", "2", "3", "4"]
     if game_list != "NO_GAMES":
         msg = "-----------------------------------------------\n" + "Available games\n" \
-            + "-----------------------------------------------\n" + game_list + "\n" \
-            + "-----------------------------------------------\n"
+              + "-----------------------------------------------\n" + game_list + "\n" \
+              + "-----------------------------------------------\n"
     else:
         msg = "There are no games available. Please, create a new game.\n"
         options = "0"

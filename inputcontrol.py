@@ -94,6 +94,3 @@ def check_args(players, stages, name):
         raise ArgumentError
     else:
         print("A game with " + str(stages) + " stage(s) will be set up for " + str(players) + " player(s).")
-
-
-

@@ -45,19 +45,20 @@ class Characters:
     def set_alive(self, alive):
         self.stats["alive"] = alive
 
-    def attack(self, enemy, dmg, round, name):
+    def attack(self, enemy, dmg, current_round, name):
         hp = enemy.stats["HP"]
         if enemy.stats["alive"]:
             if self.__class__.__name__ == "Procrastinator":
-                dmg += (round - 1)
+                dmg += (current_round - 1)
             hp -= dmg
             if hp <= 0:
                 enemy.stats["HP"], hp = 0, 0
                 enemy.stats["alive"] = False
             else:
                 enemy.stats["HP"] = hp
-            msg = "The {} ({}) did {} damage to {}. {} has {}hp left.".format(self.__class__.__name__, name, dmg,
-                                                                              enemy.name, enemy.name, hp)
+            msg = "\nThe {} ({}) did {} damage to {}. " \
+                  "{} has {}hp left.".format(self.__class__.__name__, name, dmg,
+                                             enemy.name, enemy.name, hp)
             return msg
 
     # hp can't be higher than hp_max
