@@ -112,6 +112,7 @@ def manage_bookworm_send(msgc, c_socket):
 
 
 try:
+    clear_screen()
     n_players, n_stages, ip, port, name = parse_args_client()
     check_args(n_players, n_stages, name)
     port = check_port(port)
