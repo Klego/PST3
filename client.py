@@ -1,3 +1,9 @@
+# -- Autores --
+# Paula Gallego Vieira
+# Sonia Liceth Quevedo Becerra
+# Justo Martín Collado
+# ---------------------
+
 from protocols_messages import *
 import socket
 from inputcontrol import *
@@ -150,6 +156,9 @@ try:
             send_one_message(client_socket, client_reply)
             client_socket.close()
             print("Program finished due to CTRL+C command.")
+        except socket.error:
+            break
+    client_socket.close()
 
 except ConnectionResetError:
     print("The connection to the server has been interrupted")
@@ -157,3 +166,5 @@ except ConnectionRefusedError:
     print("Could not connect to the server. Are you sure you have provided the correct ip and port?")
 except ArgumentError:
     print("Program finished due to bad arguments.")
+except BrokenPipeError:
+    pass

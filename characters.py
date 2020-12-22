@@ -86,7 +86,7 @@ class Bookworm(Characters):
 
 
 class Worker(Characters):
-    def __init__(self, skill="1.5 * (DMG + DMG roll) damage to one enemy (3 rounds)", hp_max=4, dmg=10):
+    def __init__(self, skill="1.5 * (DMG + DMG roll) damage to one enemy (3 rounds)", hp_max=40, dmg=10):
         super().__init__(skill, hp_max, dmg)
         self.stats["timeSkill"] = 3
 
