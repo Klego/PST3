@@ -4,8 +4,8 @@
 # Justo Martín Collado
 # ---------------------
 
-
-# from game import *
+# This gives a warning. We think its because global dictionaries
+from game import *
 import socket
 import threading
 from protocols_messages import *
@@ -178,13 +178,12 @@ def clear_dicts(id_game):
     global dic_sockets
     global dic_threads
 
-    for player in clients_games.keys():
+    for player in list(clients_games):
         if clients_games[player] == id_game:
             del dic_sockets[player]
             del players_names[player]
             del dic_threads[player]
-            # del clients_games[player]
-    # BORRAR DICCIONARIOS SIN USAR .KEYS
+            del clients_games[player]
     del games[id_game]
 
 
@@ -325,7 +324,10 @@ def manage_char_command(msg, c_address, c_socket):
     global games
     global clients_games
     global players_names
-    name = players_names[c_address]
+    if clients_games[c_address]:
+        name = players_names[c_address]
+    else:
+        return
     command = msg["Command"]
     id_game = clients_games[c_address]
     check = games[id_game].check_game()
@@ -388,7 +390,7 @@ def manage_disconnected_player(client_thread):
     broadcast_clients(id_game, server_reply, client_thread.client_address)
     for clients in clients_games.keys():
         if clients_games[clients] == id_game:
-            print("(DC) " + players_names[clients] + "has been disconnected")
+            print("(DC) " + players_names[clients] + " has been disconnected")
     print("SERVER: Game " + str(id_game) + " was finished because a player was disconnected.")
     for players in clients_games.keys():
         if clients_games[players] == id_game:
@@ -427,9 +429,12 @@ class ClientThread(threading.Thread):
     def run(self):
 
         while not self.end:
-            message = recv_one_message(self.client_socket)
-            msg_client = decoded_msgs(message)
-            self.manage_msg(msg_client)
+            try:
+                message = recv_one_message(self.client_socket)
+                msg_client = decoded_msgs(message)
+                self.manage_msg(msg_client)
+            except TypeError:
+                pass
 
 
 class ServerSocketThread(threading.Thread):
