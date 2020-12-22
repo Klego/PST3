@@ -146,7 +146,7 @@ def craft_bookworm_send(msg, resurrection_list):
     option = 1
     if len(resurrection_list) > 0:
         while option <= len(resurrection_list):
-            options.append(option)
+            options.append(str(option))
             option += 1
 
     message = {"Protocol": PROTOCOL_BOOKWORM_SEND, "Message": msg, "Options": options, "List": resurrection_list}

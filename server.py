@@ -182,9 +182,9 @@ def clear_dicts(id_game):
         if clients_games[player] == id_game:
             del dic_sockets[player]
             del players_names[player]
-            del dic_sockets[player]
             del dic_threads[player]
-            del clients_games[player]
+            # del clients_games[player]
+    # BORRAR DICCIONARIOS SIN USAR .KEYS
     del games[id_game]
 
 
@@ -245,14 +245,8 @@ def manage_bookworm(msg, name, c_address, c_socket):
     resurrection_list = msg["List"]
     id_game = clients_games[c_address]
     server_reply = games[id_game].char_resurrect(resurrection_list, option, name)
-    games[id_game].set_turn(name)
     send_message(server_reply, c_socket)
-    if not check_player_attack(games[id_game]):
-        server_reply = craft_wait()
-        send_one_message(c_socket, server_reply)
-    else:
-        server_reply = craft_continue()
-        broadcast_clients(id_game, server_reply, c_address)
+    send_wait_or_continue(name, id_game, c_socket, c_address)
 
 
 def enemies_turn(id_game):
