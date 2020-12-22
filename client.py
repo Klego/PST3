@@ -1,7 +1,6 @@
 from protocols_messages import *
 import socket
 from inputcontrol import *
-import json
 
 
 def msg_join(c_socket, nick):
@@ -95,7 +94,7 @@ def manage_bookworm_send(msgc, c_socket):
     list_resurrect = msgc["List"]
     choose = ""
     if len(list_resurrect) > 0:
-        while choose not in str(options):
+        while choose not in options:
             choose = input(msg)
             if choose not in str(options):
                 print("Option not valid. Try again")

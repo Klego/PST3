@@ -116,34 +116,32 @@ class Game:
             return msg
 
     def __random_char(self):
-        jug = ""
         cont = 0
         n = random.randint(0, len(self.dicPlayer) - 1)
         for x in self.dicPlayer.keys():
             if n == cont:
                 jug = self.dicPlayer[x]
+                return jug, x
             cont += 1
-        return jug
 
     def turn_enemy_attack(self):
-        x = ""
         msg = ""
         for enemy in self.enemies:
             if enemy.get_alive():
                 if self.__check_chars_alive():
-                    jug = self.__random_char()
+                    jug, name = self.__random_char()
                     while not jug.get_alive():
-                        jug = self.__random_char()
+                        jug, name = self.__random_char()
                     if jug.get_alive():
                         dmg = self.__random_damage(enemy.get_dmg())
-                        msg += "\n" + enemy.attack(x, jug, dmg, self.current_stage)
+                        msg += "\n" + enemy.attack(name, jug, dmg, self.current_stage)
         msg += "\n+++++++++++++++++++++++++++++ End Round %s +++++++++++++++++++++++++++++" % self.current_round
         return msg
 
-    def heal(self, character, name):
-        jug = self.__random_char()
+    def heal(self, character):
+        jug, name = self.__random_char()
         while (not jug.get_alive()) or (jug.get_hp() == jug.get_hp_max()):
-            jug = self.__random_char()
+            jug, name = self.__random_char()
         cure = character.get_dmg() * 2
         hp = jug.get_hp()
         hp += cure
@@ -167,8 +165,6 @@ class Game:
                     character = self.dicPlayer[name]
                     character.set_timeskill(0)
                     msg = "OMG!!!!! This player is alive again!!!!! \n{}".format(self.dicPlayer[revive_player])
-        else:
-            pass
         return msg
 
     def app_bookworm_skill(self, character):
@@ -185,8 +181,6 @@ class Game:
         msg += "\n********************************************************"
         if len(list_to_revive) > 0:
             msg += "\nWho do you want to revive? "
-        else:
-            msg = "\nThere isn't anyone dead to revive.\n You have lost a turn. :)"
         return msg, list_to_revive
 
     def app_worker_skill(self, character, message, name):
@@ -209,7 +203,7 @@ class Game:
         if not_hp_max:
             if character.get_timeskill() >= 3:
                 new_msg = message.format(character.__class__.__name__, name)
-                new_msg += "\n" + self.heal(character, name)
+                new_msg += "\n" + self.heal(character)
                 character.set_timeskill(0)
             else:
                 new_msg = "\nThe skill is currently in cooldown for {} more rounds. \n You have lost a turn. :)" \
@@ -232,6 +226,7 @@ class Game:
         return new_msg
 
     def choose_character_option(self, option, name):
+        list_to_revive = []
         new_msg = ""
         character = self.dicPlayer[name]
         character.update_timeskill()
@@ -247,12 +242,13 @@ class Game:
                         new_msg = message.format(character.__class__.__name__, name)
                         msg_book, list_to_revive = self.app_bookworm_skill(character)
                         new_msg += msg_book
-                        return new_msg, list_to_revive
+
                     else:
                         new_msg = "\nThe skill is currently in cooldown for {} more rounds." \
                                   "\n You have lost a turn. :)".format(4 - character.get_timeskill())
                 else:
                     new_msg = "\nAll players are alive, so the skill will not be used.\n You have lost a turn. :)"
+                return new_msg, list_to_revive
             elif character.__class__.__name__ == Worker.__name__:
                 new_msg = self.app_worker_skill(character, message, name)
             elif character.__class__.__name__ == Whatsapper.__name__:
@@ -283,7 +279,7 @@ class Game:
                 self.dicPlayer[player].set_used_skill(False)
                 self.dicPlayer[player].set_timeskill(0)
         if self.current_stage < int(self.stages):
-            msg = "\nPlayers won this level. Continue next stage."
+            msg = "\nPLAYERS WON THIS LEVEL!!!! Continue next stage."
             msg += "\nEvery character will be added +1/4 HP. These are the updated attributes of each player: "
             msg += self.show_chars_attributes()
         else:

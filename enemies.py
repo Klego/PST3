@@ -11,11 +11,11 @@ class Enemy:
         if option == 1:
             # 20
             self.name = "Partial Exam"
-            self.stats = {"HP": 20, "DMG": 6, "alive": True}
+            self.stats = {"HP": 2, "DMG": 6, "alive": True}
         elif option == 2:
             # 40
             self.name = "Final Exam"
-            self.stats = {"HP": 40, "DMG": 12, "alive": True}
+            self.stats = {"HP": 4, "DMG": 12, "alive": True}
         elif option == 3:
             # 8
             self.name = "Theoretical class"
@@ -23,7 +23,7 @@ class Enemy:
         elif option == 4:
             # 15
             self.name = "Teacher"
-            self.stats = {"HP": 15, "DMG": 7, "alive": True}
+            self.stats = {"HP": 1, "DMG": 7, "alive": True}
 
     def attack(self, name, character, dmg, stage):
         msg = ""
