@@ -18,9 +18,6 @@ class Node:
     def set_value(self, value):
         self.value = value
 
-    def set_key(self, key):
-        self.key = key
-
     def get_next_node(self):
         return self.next
 
@@ -38,15 +35,18 @@ class DoublyLinkedList:
 
     def __init__(self, head=None):
         self.head = head
-        self.size = 0
+        self.length = 0
 
-    def get_size(self):
-        return self.size
+    def get_length(self):
+        return self.length
 
-    def append(self, key, value):
+    def __set_length(self, length):
+        self.length = length
+
+    def add_last(self, key, value):
 
         new_node = Node(key, value)
-        self.size += 1
+        self.length += 1
         last = self.head
         new_node.next = None
 
@@ -69,17 +69,72 @@ class DoublyLinkedList:
                 curr = curr.get_next_node()
         return False
 
-    def delete_node(self, node):
+    @staticmethod
+    def delete_node(head, delete):
 
-        if self.head is None or node is None:
-            return
+        if head is None or delete is None:
+            return None
 
-        if self.head == node:
-            self.head = node.next
+        if head == delete:
+            head = delete.next
 
-        if node.next is not None:
-            node.next.prev = node.prev
+        if delete.next is not None:
+            delete.next.prev = delete.prev
 
-        if node.prev is not None:
-            node.prev.next = node.next
-        gc.collect()
+        if delete.prev is not None:
+            delete.prev.next = delete.next
+
+        delete = None
+        l = head.get_length()
+        l -= 1
+        head.set_length(l)
+        return head
+
+    def delete_key(self, head, key):
+        # if list is empty
+        if head is None:
+            return None
+
+        current = head
+
+        # traverse the list up to the end
+        while current is not None:
+
+            # if node found with the value 'x'
+            if current.data == key:
+
+                # save current's next node in the
+                # pointer 'next'
+                next = current.next
+
+                # delete the node pointed to by
+                # 'current'
+                head = self.delete_node(head, current)
+
+                # update current
+                current = next
+
+            # else simply move to the next node
+            else:
+                current = current.next
+
+        return head
+
+    def replace(self, key, new_value):
+        curr = self.head
+        while curr:
+            if curr.get_key() == key:
+                curr.set_value = new_value
+                return True
+            else:
+                curr = curr.get_next_node()
+        return False
+
+    def print_list(self):
+        if self.head is None:
+            return None
+        else:
+            node = self.head
+            while not node is None:
+                print(node.data)
+                node = node.next
