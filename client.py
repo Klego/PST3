@@ -111,6 +111,36 @@ def manage_bookworm_send(msgc, c_socket):
         print(msg)
 
 
+def manage_msgs(msg_client, client_socket, n_players, n_stages, finalize):
+
+    if msg_client["Protocol"] == PROTOCOL_WELCOME:
+        manage_welcome(client_socket, n_players, n_stages)
+    elif msg_client["Protocol"] == PROTOCOL_CHOOSE_CHARACTER:
+        manage_choose_character(client_socket)
+    elif msg_client["Protocol"] == PROTOCOL_SERVER_MSG:
+        manage_msg_server()
+    elif msg_client["Protocol"] == PROTOCOL_YOUR_TURN:
+        manage_turn(client_socket)
+    elif msg_client["Protocol"] == PROTOCOL_SEND_GAMES:
+        manage_send_games(client_socket, name)
+    elif msg_client["Protocol"] == PROTOCOL_SEND_VALID_GAME:
+        manage_valid_game(client_socket, name)
+    elif msg_client["Protocol"] == PROTOCOL_SEND_END_GAME:
+        manage_endgame()
+        finalize = True
+    elif msg_client["Protocol"] == PROTOCOL_SEND_DC_SERVER:
+        manage_dcserver()
+        finalize = True
+        client_socket.close()
+    elif msg_client["Protocol"] == PROTOCOL_WAIT:
+        manage_wait()
+    elif msg_client["Protocol"] == PROTOCOL_CONTINUE:
+        pass
+    elif msg_client["Protocol"] == PROTOCOL_BOOKWORM_SEND:
+        manage_bookworm_send(msg_client, client_socket)
+    return finalize
+
+
 try:
     clear_screen()
     n_players, n_stages, ip, port, name = parse_args_client()
@@ -126,31 +156,7 @@ try:
             msg_type = recv_one_message(client_socket)
             if msg_type is not None or msg_type != '':
                 msg_client = decoded_msgs(msg_type)
-                if msg_client["Protocol"] == PROTOCOL_WELCOME:
-                    manage_welcome(client_socket, n_players, n_stages)
-                elif msg_client["Protocol"] == PROTOCOL_CHOOSE_CHARACTER:
-                    manage_choose_character(client_socket)
-                elif msg_client["Protocol"] == PROTOCOL_SERVER_MSG:
-                    manage_msg_server()
-                elif msg_client["Protocol"] == PROTOCOL_YOUR_TURN:
-                    manage_turn(client_socket)
-                elif msg_client["Protocol"] == PROTOCOL_SEND_GAMES:
-                    manage_send_games(client_socket, name)
-                elif msg_client["Protocol"] == PROTOCOL_SEND_VALID_GAME:
-                    manage_valid_game(client_socket, name)
-                elif msg_client["Protocol"] == PROTOCOL_SEND_END_GAME:
-                    manage_endgame()
-                    finalize = True
-                elif msg_client["Protocol"] == PROTOCOL_SEND_DC_SERVER:
-                    manage_dcserver()
-                    finalize = True
-                    client_socket.close()
-                elif msg_client["Protocol"] == PROTOCOL_WAIT:
-                    manage_wait()
-                elif msg_client["Protocol"] == PROTOCOL_CONTINUE:
-                    pass
-                elif msg_client["Protocol"] == PROTOCOL_BOOKWORM_SEND:
-                    manage_bookworm_send(msg_client, client_socket)
+                finalize = manage_msgs(msg_client, client_socket, n_players, n_stages, finalize)
         except KeyboardInterrupt:
             client_reply = craft_send_dc_me()
             send_one_message(client_socket, client_reply)
