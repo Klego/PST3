@@ -130,11 +130,25 @@ class DoublyLinkedList:
                 curr = curr.get_next_node()
         return False
 
-    def print_list(self):
+    def print_list_key(self):
         if self.head is None:
             return None
         else:
             node = self.head
-            while not node is None:
-                print(node.data)
+            while node is not None:
+                print(node.key)
                 node = node.next
+
+    def get_cursor(self):
+        return self.head
+
+    def __iter__(self):
+        cursor = self.get_cursor()
+        if cursor is None:
+            return False
+        else:
+            count = 1
+            while cursor is not None and count <= self.get_length():
+                yield cursor
+                cursor = cursor.next
+                count += 1
