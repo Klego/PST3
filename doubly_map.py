@@ -43,7 +43,7 @@ class DoublyLinkedList:
     def __set_length(self, length):
         self.length = length
 
-    def add_last(self, key, value):
+    def add(self, key, value):
 
         new_node = Node(key, value)
         self.length += 1
@@ -85,9 +85,9 @@ class DoublyLinkedList:
             delete.prev.next = delete.next
 
         delete = None
-        l = head.get_length()
-        l -= 1
-        head.set_length(l)
+        length = head.get_length()
+        length -= 1
+        head.set_length(length)
         return head
 
     def delete_key(self, head, key):
