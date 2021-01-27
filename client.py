@@ -7,6 +7,7 @@
 from protocols_messages import *
 import socket
 from inputcontrol import *
+import os
 
 
 def msg_join(c_socket, nick):
@@ -86,13 +87,6 @@ def manage_dcserver():
     print(msg_client["Reason"])
 
 
-def manage_wait():
-    print("Waiting for other players")
-
-
-def manage_continue():
-    print("The game can continue")
-
 
 def manage_bookworm_send(msgc, c_socket):
     msg = msgc["Message"]
@@ -133,16 +127,15 @@ def manage_msgs(msg_client, client_socket, n_players, n_stages, finalize):
         finalize = True
         client_socket.close()
     elif msg_client["Protocol"] == PROTOCOL_WAIT:
-        manage_wait()
+        print("Waiting for other players")
     elif msg_client["Protocol"] == PROTOCOL_CONTINUE:
-        pass
+        print("The game can continue")
     elif msg_client["Protocol"] == PROTOCOL_BOOKWORM_SEND:
         manage_bookworm_send(msg_client, client_socket)
     return finalize
 
 
 try:
-    clear_screen()
     n_players, n_stages, ip, port, name = parse_args_client()
     check_args(n_players, n_stages, name)
     port = check_port(port)
@@ -162,8 +155,10 @@ try:
             send_one_message(client_socket, client_reply)
             client_socket.close()
             print("Program finished due to CTRL+C command.")
-        except socket.error:
-            break
+        except OSError:
+            # MIRAR CUANDO SUCEDE ESTE ERROR
+            print("EL CLIENTE SE HA DESCONECTADO DE LA PARTIDA OS ERROR")
+            client_socket.close()
     client_socket.close()
 
 except ConnectionResetError:
