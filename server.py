@@ -455,7 +455,6 @@ class ServerSocketThread(threading.Thread):
 
 def main():
     try:
-        inputcontrol.clear_screen()
         port = inputcontrol.parse_args_server()
         port = inputcontrol.check_port(port)
         server_socket_thread = ServerSocketThread(port)

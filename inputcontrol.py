@@ -6,8 +6,7 @@ MAX_PLAYERS = 4
 MIN_PLAYERS, MIN_STAGES = 1, 1
 MAX_STAGES = 10
 IP = "127.0.0.1"
-PORT_CLIENT = 8080
-PORT_SERVER = 8080
+DEFAULT_PORT = 8080
 MIN_PORT = 1024
 MAX_PORT = 65535
 
@@ -16,15 +15,12 @@ class ArgumentError(Exception):
     pass
 
 
-def clear_screen():
-    os.system('cls' if os.name == 'nt' else 'clear')
-
 
 def parse_args_server():
-    port = PORT_SERVER
+    port = DEFAULT_PORT
     opts, args = getopt.getopt(sys.argv[1:], "p:", ["port="])
     for o, a in opts:
-        if o in ("-o", "--port"):
+        if o in ("-p", "--port"):
             port = a
     return port
 
@@ -33,7 +29,7 @@ def parse_args_client():
     number_players = MIN_PLAYERS
     number_stages = MIN_STAGES
     ip = IP
-    port = PORT_CLIENT
+    port = DEFAULT_PORT
     name = None
     opts, args = getopt.getopt(sys.argv[1:], "p:s:i:o:n:", ["players=", "stages=", "ip=", "port=", "name="])
     for o, a in opts:
