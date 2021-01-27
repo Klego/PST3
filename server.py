@@ -5,7 +5,7 @@
 # ---------------------
 
 # This gives a warning. We think its because global dictionaries
-from game import *
+# from game import *
 import socket
 import threading
 from protocols_messages import *
@@ -57,7 +57,10 @@ def creator_name(id_game):
             for j in players_names.keys():
                 if j == i:
                     list_names.append(players_names[j])
-    creators_name = list_names[0]
+    if len(list_names) > 0:
+        creators_name = list_names[0]
+    else:
+        creators_name = "None"
     return creators_name
 
 
@@ -139,9 +142,9 @@ def save_character(c_address, id_game, c_socket, name, game, option, client_thre
     game.set_player(character, name)
 
 
-def send_message(msg, c_socket):
+def send_message(msg, id_game):
     message = craft_server_msg(msg)
-    send_one_message(c_socket, message)
+    send_to_all_players(id_game, message)
 
 
 def send_turn(id_game):
@@ -243,8 +246,8 @@ def manage_bookworm(msg, name, c_address, c_socket):
     option = msg["Option"]
     resurrection_list = msg["List"]
     id_game = clients_games[c_address]
-    server_reply = games[id_game].char_resurrect(resurrection_list, option, name)
-    send_message(server_reply, c_socket)
+    new_msg = games[id_game].char_resurrect(resurrection_list, option, name)
+    send_message(new_msg, id_game)
     send_wait_or_continue(name, id_game, c_socket, c_address)
 
 
@@ -324,8 +327,9 @@ def manage_char_command(msg, c_address, c_socket):
     global games
     global clients_games
     global players_names
-    if clients_games[c_address]:
-        name = players_names[c_address]
+    if len(clients_games) > 0:
+        if clients_games[c_address]:
+            name = players_names[c_address]
     else:
         return
     command = msg["Command"]
@@ -340,16 +344,16 @@ def manage_char_command(msg, c_address, c_socket):
                     server_reply = craft_bookworm_send(msg, list_to_resurrect)
                     send_one_message(c_socket, server_reply)
                 else:
-                    send_message(msg, c_socket)
+                    send_message(msg, id_game)
                     send_wait_or_continue(name, id_game, c_socket, c_address)
             else:
                 msg = games[id_game].choose_character_option(command, name)
-                send_message(msg, c_socket)
+                send_message(msg, id_game)
                 send_wait_or_continue(name, id_game, c_socket, c_address)
         else:
-            msg = "\nThe {} ({}) has been defeated. It can not make any move until revived.\n Your turn is passed."
+            msg = "\nThe {} ({}) has been defeated. It can not make any move until revived.\n The turn is passed."
             new_msg = msg.format(games[id_game].get_dic_player(name).__class__.__name__, name)
-            send_message(new_msg, c_socket)
+            send_message(new_msg, id_game)
             send_wait_or_continue(name, id_game, c_socket, c_address)
     else:
         game_check(id_game)
@@ -367,13 +371,20 @@ def manage_game_choice(msg, c_socket, c_address, name):
         if i == option:
             num_players += 1
     if num_players < players:
-        joined = True
-        server_reply = craft_send_valid_game(joined)
-        send_one_message(c_socket, server_reply)
-        awaiting_players[c_address] = option
-        print("(JOIN) " + name + " joined " + creator_name(option) + "'s game")
-        server_reply = craft_choose_character()
-        send_one_message(c_socket, server_reply)
+        if len(clients_games) > 0:
+            joined = True
+            server_reply = craft_send_valid_game(joined)
+            send_one_message(c_socket, server_reply)
+            awaiting_players[c_address] = option
+            print("(JOIN) " + name + " joined " + creator_name(option) + "'s game")
+            server_reply = craft_choose_character()
+            send_one_message(c_socket, server_reply)
+        else:
+            msg = "There is no game created"
+            server_reply = craft_server_msg(msg)
+            send_one_message(c_socket, server_reply)
+            server_reply = craft_welcome()
+            send_one_message(c_socket, server_reply)
     else:
         joined = False
         server_reply = craft_send_valid_game(joined)
