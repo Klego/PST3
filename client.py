@@ -7,7 +7,7 @@
 from protocols_messages import *
 import socket
 from inputcontrol import *
-import os
+# import os
 
 
 def msg_join(c_socket, nick):
@@ -106,7 +106,6 @@ def manage_bookworm_send(msgc, c_socket):
 
 
 def manage_msgs(msg_client, client_socket, n_players, n_stages, finalize):
-
     if msg_client["Protocol"] == PROTOCOL_WELCOME:
         manage_welcome(client_socket, n_players, n_stages)
     elif msg_client["Protocol"] == PROTOCOL_CHOOSE_CHARACTER:
@@ -155,12 +154,10 @@ try:
             send_one_message(client_socket, client_reply)
             client_socket.close()
             print("Program finished due to CTRL+C command.")
-        except OSError:
-            # MIRAR CUANDO SUCEDE ESTE ERROR
-            print("EL CLIENTE SE HA DESCONECTADO DE LA PARTIDA OS ERROR")
-            client_socket.close()
     client_socket.close()
-
+except OSError:
+    # MIRAR CUANDO SUCEDE ESTE ERROR
+    print("EL CLIENTE SE HA DESCONECTADO DE LA PARTIDA OS ERROR")
 except ConnectionResetError:
     print("The connection to the server has been interrupted")
 except ConnectionRefusedError:
