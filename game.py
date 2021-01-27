@@ -47,14 +47,15 @@ class Game:
 
     @staticmethod
     def choose_character(option):
+        option = int(option)
         character = None
-        if option == "1":
+        if option == 1:
             character = Bookworm()
-        elif option == "2":
+        elif option == 2:
             character = Worker()
-        elif option == "3":
+        elif option == 3:
             character = Whatsapper()
-        elif option == "4":
+        elif option == 4:
             character = Procrastinator()
         return character
 
