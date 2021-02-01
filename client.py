@@ -156,8 +156,7 @@ try:
             print("Program finished due to CTRL+C command.")
     client_socket.close()
 except OSError:
-    # MIRAR CUANDO SUCEDE ESTE ERROR
-    print("EL CLIENTE SE HA DESCONECTADO DE LA PARTIDA OS ERROR")
+    print("Client disconnected due to OSERROR")
 except ConnectionResetError:
     print("The connection to the server has been interrupted")
 except ConnectionRefusedError:
