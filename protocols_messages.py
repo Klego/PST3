@@ -42,8 +42,11 @@ def recv_one_message(sock):
 
 def send_one_message(sock, data):
     length = len(data)
-    sock.sendall(struct.pack('!I', length))
-    sock.sendall(data)
+    try:
+        sock.sendall(struct.pack('!I', length))
+        sock.sendall(data)
+    except AttributeError:
+        pass
 
 
 def craft_join(nick):
