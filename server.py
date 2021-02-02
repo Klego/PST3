@@ -186,11 +186,11 @@ def clear_dicts(id_game):
 
     for player in clients_games:
         if clients_games.find_node(player) == id_game:
-            del ll_sockets[player]
-            del players_names[player]
-            del ll_threads[player]
-            del clients_games[player]
-    del games[id_game]
+            ll_sockets.delete_node_by_key(player)
+            players_names.delete_node_by_key(player)
+            ll_threads.delete_node_by_key(player)
+            clients_games.delete_node_by_key(player)
+    games.delete_node_by_key(id_game)
 
 
 def check_player_attack(game):

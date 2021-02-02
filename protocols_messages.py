@@ -50,7 +50,7 @@ def send_one_message(sock, data):
     except ConnectionAbortedError:
         pass
     except BrokenPipeError:
-        print("The sendall function has explode")
+        print("Please, wait some time before creating new game to wait for the memory to clear correctly")
 
 
 def craft_join(nick):
