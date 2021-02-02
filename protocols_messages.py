@@ -47,6 +47,8 @@ def send_one_message(sock, data):
         sock.sendall(data)
     except AttributeError:
         pass
+    except ConnectionAbortedError:
+        pass
 
 
 def craft_join(nick):
