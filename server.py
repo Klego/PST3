@@ -472,7 +472,8 @@ class ServerSocketThread(threading.Thread):
 
 def shutdown_server():
     global ll_sockets
-    reason = "SERVER SHUTDOWN BY THE ADMIN"
+    print("The server has been closed by the admin.")
+    reason = "The server has been shut down by the admin. You have been disconnected."
     server_reply = craft_send_dc_server(reason)
     for client_socket in ll_sockets:
         send_one_message(client_socket, server_reply)
@@ -496,8 +497,8 @@ def games_info():
             dead_players.insert(1, game.get_dead_players())
             current_stage.insert(1, game.get_current_stage())
             total_stages.insert(1, game.get_stages())
-        count = 1
-        while count <= len(games) + 1:
+        count = 0
+        while count < len(games):
             print("------ GAME -----\n")
             print("Total Players: ", str(total_players[count]) + "\n")
             print("Dead Players: ", str(dead_players[count]) + "\n")
@@ -505,6 +506,8 @@ def games_info():
             print("Total Stages: ", str(total_stages[count]) + "\n")
             print("--------------------\n\n")
             count += 1
+    else:
+        print("There are no available games at the moment\n")
 
 
 try:
