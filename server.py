@@ -484,7 +484,27 @@ def ngames():
 
 
 def games_info():
-    print("hola")
+    global games
+    total_players = []
+    dead_players = []
+    current_stage = []
+    total_stages = []
+    if len(games) > 0:
+        for id_game in games:
+            game = games[id_game]
+            total_players.insert(1, game.get_players())
+            dead_players.insert(1, game.get_dead_players())
+            current_stage.insert(1, game.get_current_stage())
+            total_stages.insert(1, game.get_stages())
+        count = 1
+        while count <= len(games) + 1:
+            print("------ GAME -----\n")
+            print("Total Players: ", str(total_players[count]) + "\n")
+            print("Dead Players: ", str(dead_players[count]) + "\n")
+            print("Current Stage: ", str(current_stage[count]) + "\n")
+            print("Total Stages: ", str(total_stages[count]) + "\n")
+            print("--------------------\n\n")
+            count += 1
 
 
 try:
