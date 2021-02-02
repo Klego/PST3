@@ -5,7 +5,7 @@
 # ---------------------
 
 # This gives a warning. We think it's because global dictionaries
-# from game import *
+from game import *
 import socket
 import threading
 from protocols_messages import *
