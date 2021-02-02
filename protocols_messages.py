@@ -49,6 +49,8 @@ def send_one_message(sock, data):
         pass
     except ConnectionAbortedError:
         pass
+    except BrokenPipeError:
+        print("The sendall function has explode")
 
 
 def craft_join(nick):
