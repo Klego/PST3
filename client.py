@@ -7,7 +7,6 @@
 from protocols_messages import *
 import socket
 from inputcontrol import *
-# import os
 
 
 def msg_join(c_socket, nick):
@@ -85,7 +84,6 @@ def manage_endgame():
 
 def manage_dcserver():
     print(msg_client["Reason"])
-
 
 
 def manage_bookworm_send(msgc, c_socket):

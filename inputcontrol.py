@@ -1,6 +1,5 @@
 import getopt
 import sys
-import os
 
 MAX_PLAYERS = 4
 MIN_PLAYERS, MIN_STAGES = 1, 1
@@ -13,7 +12,6 @@ MAX_PORT = 65535
 
 class ArgumentError(Exception):
     pass
-
 
 
 def parse_args_server():
