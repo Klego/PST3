@@ -5,7 +5,7 @@
 # ---------------------
 
 # This gives a warning. We think it's because global dictionaries
-from game import *
+# from game import *
 import socket
 import threading
 from protocols_messages import *
@@ -24,20 +24,18 @@ finished_games = DoublyLinkedList()
 def list_players_in_games():
     global games
     global clients_games
-    players_in_game = 0
     available_games = ""
-    i = 0
-    players = 0
     if games.get_length() > 0:
         for i in games:
             players = games.find_node(i).get_players()
+            players_in_game = 0
             for j in clients_games:
                 if i == clients_games.find_node(j):
                     players_in_game += 1
-        available_games = available_games + str(i) + ".- Players: " + str(players_in_game) + "/" + str(players) + "\t"
+            available_games = available_games + str(i) + ".- Players: " + str(players_in_game) + "/" + str(
+                players) + "\n"
     else:
         available_games = "NO_GAMES"
-
     return available_games
 
 
@@ -107,9 +105,19 @@ def manage_server_option(client_thread, msg, c_address, name, c_socket):
     option = int(msg["Option"])
     players = int(msg["Players"])
     stages = int(msg["Stages"])
+    id_game = 1
+    id_aux = 1
+    found = False
     if option == 1:
-        if games.length <= 3:
-            id_game = games.length + 1
+        if games.get_length() <= 3:
+            while id_aux <= games.get_length() or not found:
+                if not games.find_node(id_aux):
+                    id_game = id_aux
+                    id_aux += 1
+                    found = True
+                else:
+                    id_aux += 1
+                    id_game = id_aux
             game = Game(players, stages)
             games.append(id_game, game)
             awaiting_players.append(c_address, id_game)
@@ -183,15 +191,17 @@ def clear_dicts(id_game):
     global players_names
     global ll_sockets
     global ll_threads
-
+    list_player = []
     for player in clients_games:
+        list_player.append(player)
         if clients_games.find_node(player) == id_game:
-            ll_sockets.delete_node_by_key(player)
-            players_names.delete_node_by_key(player)
-            ll_threads.delete_node_by_key(player)
-            clients_games.delete_node_by_key(player)
-    games.delete_node_by_key(id_game)
-
+            del ll_sockets[player]
+            del players_names[player]
+            del ll_threads[player]
+    for p in list_player:
+        if clients_games.find_node(p) == id_game:
+            del clients_games[p]
+    del games[id_game]
 
 def check_player_attack(game):
     if len(game.get_check_turn()) < game.get_players():
@@ -372,29 +382,34 @@ def manage_game_choice(msg, c_socket, c_address, name):
     option = int(msg["Option"])
     num_players = 0
     game = games.find_node(option)
-    players = game.players
-    for i in clients_games:
-        if i == option:
-            num_players += 1
-    if num_players < players:
-        if clients_games.get_length() > 0:
-            joined = True
-            server_reply = craft_send_valid_game(joined)
-            send_one_message(c_socket, server_reply)
-            awaiting_players.append(c_address, option)
-            print("\n(JOIN) " + name + " joined " + creator_name(option) + "'s game")
-            server_reply = craft_choose_character()
-            send_one_message(c_socket, server_reply)
-        else:
-            msg = "\nThere is no game created"
-            server_reply = craft_server_msg(msg)
-            send_one_message(c_socket, server_reply)
-            server_reply = craft_welcome()
-            send_one_message(c_socket, server_reply)
-    else:
+    if not game:
         joined = False
         server_reply = craft_send_valid_game(joined)
         send_one_message(c_socket, server_reply)
+    else:
+        players = game.get_players()
+        for i in clients_games:
+            if clients_games.find_node(i) == option:
+                num_players += 1
+        if num_players < players:
+            if clients_games.get_length() > 0:
+                joined = True
+                server_reply = craft_send_valid_game(joined)
+                send_one_message(c_socket, server_reply)
+                awaiting_players.append(c_address, option)
+                print("\n(JOIN) " + name + " joined " + creator_name(option) + "'s game")
+                server_reply = craft_choose_character()
+                send_one_message(c_socket, server_reply)
+            else:
+                msg = "\nThere is no game created"
+                server_reply = craft_server_msg(msg)
+                send_one_message(c_socket, server_reply)
+                server_reply = craft_welcome()
+                send_one_message(c_socket, server_reply)
+        else:
+            joined = False
+            server_reply = craft_send_valid_game(joined)
+            send_one_message(c_socket, server_reply)
 
 
 def manage_disconnected_player(client_thread):

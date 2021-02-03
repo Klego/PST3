@@ -256,7 +256,6 @@ class Game:
                         new_msg = message.format(character.__class__.__name__, name)
                         msg_book, list_to_revive = self.app_bookworm_skill(character)
                         new_msg += msg_book
-
                     else:
                         new_msg = "\nThe skill is currently in cooldown for {} more rounds." \
                                   "\n You have lost a turn. :)".format(4 - character.get_timeskill())

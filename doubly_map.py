@@ -17,15 +17,6 @@ class Node:
     def get_next_node(self):
         return self.next
 
-    def set_next_node(self, node):
-        self.next = node
-
-    def get_prev_node(self):
-        return self.prev
-
-    def set_prev_node(self, node):
-        self.prev = node
-
 
 class DoublyLinkedList:
 
@@ -37,11 +28,7 @@ class DoublyLinkedList:
     def get_length(self):
         return self.length
 
-    def __set_length(self, length):
-        self.length = length
-
     def append(self, key, value):
-
         new_node = Node(key, value)
         self.length += 1
         last = self.head
@@ -68,71 +55,34 @@ class DoublyLinkedList:
                 curr = curr.get_next_node()
         return False
 
-    # def delete_node_by_key(self, delete):
-    #     if self.head is None:
-    #         return
-    #     elif delete == self.head.key:
-    #         if self.head.next is not None:
-    #             self.head = self.head.next
-    #         else:
-    #             self.head = None
-    #     else:
-    #         current = self.head
-    #         while current is not None:
-    #             if current.key == delete:
-    #                 if current == self.tail:
-    #                     if current.prev is not None:
-    #                         self.tail = current.prev
-    #                 if current.next is not None:
-    #                     current.next.prev = current.prev
-    #                 elif current.prev is not None:
-    #                     current.prev.next = current.next
-    #             else:
-    #                 current = current.next
-    #     length = self.length
-    #     length -= 1
-    #     self.length = length
-
-    def delete_node_by_key(self, key):
-        cur = self.head
-        while cur:
-            if cur.key == key and cur == self.head:
-                # Case 1:
-                if not cur.next:
-                    #cur = None
-                    self.head = None
-                    return
-                # Case 2:
+    def delete_node_by_key(self, delete):
+        if self.head is None:
+            print("There aren't any nodes in the Doubly Linked List")
+            return
+        elif delete == self.head.key:
+            if self.head.next is not None:
+                self.head = self.head.next
+            else:
+                self.head = None
+        else:
+            current = self.head
+            while current is not None:
+                if current.key == delete:
+                    if current == self.tail:
+                        if current.prev is not None:
+                            self.tail = current.prev
+                            current = None
+                    else:
+                        if current.next is not None:
+                            current.next.prev = current.prev
+                        if current.prev is not None:
+                            current.prev.next = current.next
+                        current = None
                 else:
-                    nxt = cur.next
-                    cur.next = None
-                    nxt.prev = None
-                    #cur = None
-                    self.head = nxt
-                    return
-
-            elif cur.key == key:
-                # Case 3:
-                if cur.next:
-                    nxt = cur.next
-                    prev = cur.prev
-                    prev.next = nxt
-                    nxt.prev = prev
-                    #cur.next = None
-                    #cur.prev = None
-                    #cur = None
-                    return
-
-                # Case 4:
-                else:
-                    prev = cur.prev
-                    prev.next = None
-                    #cur.prev = None
-                    #cur = None
-                    return
-
-            if cur.next:
-                cur = cur.next
+                    current = current.next
+        length = self.length
+        length -= 1
+        self.length = length
 
     def replace(self, key, new_value):
         curr = self.head
@@ -169,17 +119,6 @@ class DoublyLinkedList:
                 yield cursor.key
                 cursor = cursor.next
                 count += 1
-
-    def iter_backwards(self):
-        cursor = self.get_tail()
-        if cursor is None:
-            return False
-        else:
-            count = self.length
-            while cursor is not None and count >= 0:
-                yield cursor.key
-                cursor = cursor.prev
-                count -= 1
 
     def __getitem__(self, item):
         value = self.find_node(item)
