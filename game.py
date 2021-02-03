@@ -20,6 +20,12 @@ class Game:
     def get_players(self):
         return self.players
 
+    def get_stages(self):
+        return self.stages
+
+    def get_current_stage(self):
+        return self.current_stage
+
     def set_player(self, character, nick):
         self.dicPlayer[nick] = character
 
@@ -34,6 +40,13 @@ class Game:
 
     def clean_check_turn(self):
         self.check_turn.clear()
+
+    def get_dead_players(self):
+        dead_players = 0
+        for char in self.dicPlayer:
+            if not self.dicPlayer[char].get_alive():
+                dead_players += 1
+        return dead_players
 
     @staticmethod
     def display_chars_menu():

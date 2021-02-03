@@ -47,6 +47,10 @@ def send_one_message(sock, data):
         sock.sendall(data)
     except AttributeError:
         pass
+    except ConnectionAbortedError:
+        pass
+    except BrokenPipeError:
+        print("Please, wait some time before creating new game to wait for the memory to clear correctly")
 
 
 def craft_join(nick):

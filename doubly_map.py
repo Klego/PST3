@@ -68,30 +68,71 @@ class DoublyLinkedList:
                 curr = curr.get_next_node()
         return False
 
-    def delete_node_by_key(self, delete):
-        if self.head is None:
-            return
-        elif delete == self.head.key:
-            if self.head.next is not None:
-                self.head = self.head.next
-            else:
-                self.head = None
-        else:
-            current = self.head
-            while current is not None:
-                if current.key == delete:
-                    if current == self.tail:
-                        if current.prev is not None:
-                            self.tail = current.prev
-                    if current.next is not None:
-                        current.next.prev = current.prev
-                    elif current.prev is not None:
-                        current.prev.next = current.next
+    # def delete_node_by_key(self, delete):
+    #     if self.head is None:
+    #         return
+    #     elif delete == self.head.key:
+    #         if self.head.next is not None:
+    #             self.head = self.head.next
+    #         else:
+    #             self.head = None
+    #     else:
+    #         current = self.head
+    #         while current is not None:
+    #             if current.key == delete:
+    #                 if current == self.tail:
+    #                     if current.prev is not None:
+    #                         self.tail = current.prev
+    #                 if current.next is not None:
+    #                     current.next.prev = current.prev
+    #                 elif current.prev is not None:
+    #                     current.prev.next = current.next
+    #             else:
+    #                 current = current.next
+    #     length = self.length
+    #     length -= 1
+    #     self.length = length
+
+    def delete_node_by_key(self, key):
+        cur = self.head
+        while cur:
+            if cur.key == key and cur == self.head:
+                # Case 1:
+                if not cur.next:
+                    #cur = None
+                    self.head = None
+                    return
+                # Case 2:
                 else:
-                    current = current.next
-        length = self.length
-        length -= 1
-        self.length = length
+                    nxt = cur.next
+                    cur.next = None
+                    nxt.prev = None
+                    #cur = None
+                    self.head = nxt
+                    return
+
+            elif cur.key == key:
+                # Case 3:
+                if cur.next:
+                    nxt = cur.next
+                    prev = cur.prev
+                    prev.next = nxt
+                    nxt.prev = prev
+                    #cur.next = None
+                    #cur.prev = None
+                    #cur = None
+                    return
+
+                # Case 4:
+                else:
+                    prev = cur.prev
+                    prev.next = None
+                    #cur.prev = None
+                    #cur = None
+                    return
+
+            if cur.next:
+                cur = cur.next
 
     def replace(self, key, new_value):
         curr = self.head

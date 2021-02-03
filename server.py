@@ -5,7 +5,7 @@
 # ---------------------
 
 # This gives a warning. We think it's because global dictionaries
-# from game import *
+from game import *
 import socket
 import threading
 from protocols_messages import *
@@ -186,11 +186,11 @@ def clear_dicts(id_game):
 
     for player in clients_games:
         if clients_games.find_node(player) == id_game:
-            del ll_sockets[player]
-            del players_names[player]
-            del ll_threads[player]
-            del clients_games[player]
-    del games[id_game]
+            ll_sockets.delete_node_by_key(player)
+            players_names.delete_node_by_key(player)
+            ll_threads.delete_node_by_key(player)
+            clients_games.delete_node_by_key(player)
+    games.delete_node_by_key(id_game)
 
 
 def check_player_attack(game):
@@ -472,7 +472,8 @@ class ServerSocketThread(threading.Thread):
 
 def shutdown_server():
     global ll_sockets
-    reason = "SERVER SHUTDOWN BY THE ADMIN"
+    print("The server has been closed by the admin.")
+    reason = "The server has been shut down by the admin. You have been disconnected."
     server_reply = craft_send_dc_server(reason)
     for client_socket in ll_sockets:
         send_one_message(client_socket, server_reply)
@@ -484,7 +485,29 @@ def ngames():
 
 
 def games_info():
-    print("hola")
+    global games
+    total_players = []
+    dead_players = []
+    current_stage = []
+    total_stages = []
+    if len(games) > 0:
+        for id_game in games:
+            game = games[id_game]
+            total_players.insert(1, game.get_players())
+            dead_players.insert(1, game.get_dead_players())
+            current_stage.insert(1, game.get_current_stage())
+            total_stages.insert(1, game.get_stages())
+        count = 0
+        while count < len(games):
+            print("------ GAME -----\n")
+            print("Total Players: ", str(total_players[count]) + "\n")
+            print("Dead Players: ", str(dead_players[count]) + "\n")
+            print("Current Stage: ", str(current_stage[count]) + "\n")
+            print("Total Stages: ", str(total_stages[count]) + "\n")
+            print("--------------------\n\n")
+            count += 1
+    else:
+        print("There are no available games at the moment\n")
 
 
 try:
